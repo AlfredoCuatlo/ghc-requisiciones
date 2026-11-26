@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requisiciones · Compras · GHC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#F5F4F0;--surface:#FFF;--bdr:#D8D5CC;--bdr2:#E8E6DF;--txt:#18170E;--mut:#6A6760;
+  --acc:#1B4F72;--acc-lt:#EAF2F8;--acc-dk:#163F5C;
+  --grn:#1A5C38;--grn-lt:#E8F5EE;--amber:#7A4F00;--amber-bg:#FEF3DC;--red:#991B1B;--red-bg:#FEE2E2;
+  --vio:#5B3E8F;--vio-bg:#EFE9F8;
+  --sans:'Sora',system-ui,sans-serif;--mono:'Fira Code',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:13.5px}
+button,input,select,textarea{font-family:inherit;font-size:13.5px;color:inherit}
+.hidden{display:none!important}
+.mono{font-family:var(--mono)}
+.mut{color:var(--mut)}
+.small{font-size:12px}
+a{color:var(--acc)}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center}
+.login form{background:#fff;border:1px solid var(--bdr);border-radius:14px;padding:32px;width:360px}
+.logo{width:52px;height:52px;border-radius:13px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px;margin-bottom:14px}
+
+/* shell */
+.shell{display:grid;grid-template-columns:230px 1fr;height:100vh}
+aside{background:var(--acc-dk);color:#fff;display:flex;flex-direction:column;padding:16px 10px}
+aside .brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px;font-weight:600}
+aside .brand .logo{width:34px;height:34px;font-size:12px;margin:0;border-radius:9px;background:#fff;color:var(--acc)}
+aside nav button{display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;border:0;color:#D6E3EE;padding:9px 10px;border-radius:8px;text-align:left;cursor:pointer;font-size:13px}
+aside nav button:hover{background:rgba(255,255,255,.08)}
+aside nav button.on{background:#fff;color:var(--acc);font-weight:600}
+aside nav .cnt{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.15);padding:1px 7px;border-radius:9px}
+aside nav button.on .cnt{background:var(--acc-lt)}
+aside nav .sep{height:1px;background:rgba(255,255,255,.12);margin:10px 4px}
+aside .me{margin-top:auto;padding:10px 8px 0;border-top:1px solid rgba(255,255,255,.12);font-size:12px;color:#BFD0DE}
+aside .me button{background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:7px;padding:4px 10px;margin-top:8px;cursor:pointer}
+.content{overflow:auto;display:flex;flex-direction:column}
+.toolbar{display:flex;gap:10px;align-items:center;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.toolbar h2{margin:0 auto 0 0;font-size:17px}
+input.i,select.i,textarea.i{border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;background:#fff;min-height:36px}
+input.i:focus,select.i:focus,textarea.i:focus{outline:2px solid var(--acc);outline-offset:-1px}
+.btn{border:0;border-radius:8px;padding:0 14px;min-height:36px;font-weight:600;background:var(--acc);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--acc-dk)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sec{background:var(--acc-lt);color:var(--acc)}
+.btn.ghost{background:#fff;color:var(--txt);border:1px solid var(--bdr)}
+.btn.danger{background:var(--red-bg);color:var(--red)}
+.btn.grn{background:var(--grn-lt);color:var(--grn)}
+.btn.sm{min-height:30px;padding:0 10px;font-size:12.5px}
+
+/* table */
+.tbl-wrap{padding:16px 20px}
+table.t{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--bdr);border-radius:10px;overflow:hidden}
+table.t th{background:#FAF9F6;text-align:left;font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);padding:9px 10px;border-bottom:1px solid var(--bdr);white-space:nowrap;position:sticky;top:0}
+table.t td{padding:9px 10px;border-bottom:1px solid var(--bdr2);vertical-align:top}
+table.t tr:last-child td{border-bottom:0}
+table.t tbody tr.click{cursor:pointer}
+table.t tbody tr.click:hover{background:#FAFAF7}
+table.t tr.sel td{background:var(--acc-lt)}
+.chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.st-Pendiente{background:#EEEDE8;color:#55534C}
+.st-En-compra{background:var(--amber-bg);color:var(--amber)}
+.st-En-pago,.st-OC-parcial{background:var(--acc-lt);color:var(--acc)}
+.st-100-con-OC{background:var(--vio-bg);color:var(--vio)}
+.st-Pagado,.st-Pagada{background:var(--grn-lt);color:var(--grn)}
+.st-Cancelado,.st-Cancelada{background:var(--red-bg);color:var(--red)}
+.prog{height:5px;background:#EEEDE8;border-radius:3px;overflow:hidden;min-width:70px}
+.prog>div{height:100%;background:var(--acc)}
+.prog.g>div{background:var(--grn)}
+.due-late{color:var(--red);font-weight:600}
+.due-soon{color:var(--amber);font-weight:600}
+.counts span{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 6px;border-radius:5px;margin-right:3px}
+
+/* drawer */
+.drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(1180px,94vw);background:var(--bg);z-index:41;display:flex;flex-direction:column;box-shadow:-8px 0 30px rgba(0,0,0,.15)}
+.drawer .dh{background:#fff;border-bottom:1px solid var(--bdr);padding:14px 20px;display:flex;gap:14px;align-items:flex-start}
+.drawer .db{overflow:auto;padding:16px 20px 30px;flex:1}
+.folio{font-family:var(--mono);font-size:19px;color:var(--acc);font-weight:500}
+.card{background:#fff;border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:14px}
+.grid3{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.kv dt{color:var(--mut)}
+.kv dd{margin:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:#fff;border:1px solid var(--bdr);border-radius:10px;margin-bottom:10px;position:sticky;top:-16px;z-index:3}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap}
+.thumb{width:46px;height:46px;border-radius:7px;border:1px solid var(--bdr);background:#F0EEE8 center/cover no-repeat;display:grid;place-items:center;font-size:18px;text-decoration:none}
+.tl .e{padding:6px 0;border-bottom:1px dashed var(--bdr2)}
+.tl .e:last-child{border:0}
+.close{background:transparent;border:0;font-size:22px;cursor:pointer;color:var(--mut);margin-left:auto}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:60;display:grid;place-items:center}
+.modal{background:#fff;border-radius:12px;padding:20px;width:min(720px,94vw);max-height:90vh;overflow:auto}
+.modal h3{margin:0 0 12px}
+label.f{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:10px 0 4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#18170E;color:#fff;padding:10px 16px;border-radius:10px;z-index:90;max-width:80vw}
+.toast.err{background:var(--red)}
+.warn{background:var(--amber-bg);color:var(--amber);border-radius:8px;padding:8px 10px;font-size:12.5px;margin:8px 0}
+.empty{padding:40px;text-align:center;color:var(--mut)}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--grn)}
+.live:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--grn);animation:pl 1.6s infinite}
+@keyframes pl{50%{opacity:.3}}
+.spin{width:20px;height:20px;border:3px solid #DDD;border-top-color:var(--acc);border-radius:50%;animation:sp .8s linear infinite;margin:30px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.badge-ok{display:inline-block;background:var(--vio-bg);color:var(--vio);font-weight:700;padding:4px 10px;border-radius:8px}
+</style>
+</head>
+<body>
+
+<section id="v-login" class="login hidden">
+  <form id="f-login">
+    <div class="logo">GHC</div>
+    <h2 style="margin:0 0 4px">Requisiciones · Compras</h2>
+    <p class="mut" style="margin:0 0 16px">Acceso para Compras y Administración</p>
+    <label class="f">Correo</label><input class="i" style="width:100%" id="l-email" type="email" autocomplete="username" required>
+    <label class="f">Contraseña</label><input class="i" style="width:100%" id="l-pass" type="password" autocomplete="current-password" required>
+    <p id="l-err" class="small hidden" style="color:var(--red);margin:10px 0 0"></p>
+    <button class="btn" style="width:100%;justify-content:center;margin-top:16px;min-height:42px" id="l-btn">Entrar</button>
+  </form>
+</section>
+
+<section id="v-app" class="shell hidden">
+  <aside>
+    <div class="brand"><div class="logo">GHC</div>Requisiciones</div>
+    <nav id="nav"></nav>
+    <div class="me"><div id="me-name"></div><div id="me-rol" class="small"></div><button id="b-out">Cerrar sesión</button></div>
+  </aside>
+  <div class="content" id="content"></div>
+</section>
+
+<script>
+const SB_URL='https://fssbqencxpmmjmxgnmpe.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzc2JxZW5jeHBtbWpteGdubXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NzM5NzUsImV4cCI6MjA3MDI0OTk3NX0.fsWpdmHPaKYn8P767fo5rqPHkBsQbDjplXs2xbGg9MY';
+const sb=supabase.createClient(SB_URL,SB_KEY,{db:{schema:'ops'},auth:{persistSession:true,storageKey:'ghc-req-compras-auth'}});
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fDate=s=>{if(!s)return'—';const d=new Date(s.length<=10?s+'T12:00:00':s);return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'})};
+const fDT=s=>s?new Date(s).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+const fNum=n=>Number(n||0).toLocaleString('es-MX',{maximumFractionDigits:3});
+const fMoney=n=>Number(n||0).toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+const stCls=s=>'st-'+String(s||'').replace(/%/g,'').replace(/\s+/g,'-');
+const chip=s=>`<span class="chip ${stCls(s)}">${esc(s)}</span>`;
+const debounce=(fn,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}};
+function toast(m,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),err?5000:2500)}
+const ENT={obra:'📍 Obra',otra_direccion:'🚚 Otra dirección',recoger:'🏬 Recoger'};
+function dueCls(d){if(!d)return'';const days=(new Date(d+'T23:59:59')-new Date())/864e5;return days<0?'due-late':days<=2?'due-soon':''}
+
+const S={me:null,filter:'sin_tomar',q:'',list:[],detail:null,chList:null,chDet:null,sel:new Set(),sort:'fecha'};
+const FILTERS=[
+  ['sin_tomar','Sin tomar',r=>r.n_pendiente>0&&r.estatus!=='Cancelada'],
+  ['mias','Mis tomadas',r=>(r.tomado_por||'').split(', ').includes(myName())&&!['Pagada','Cancelada','100% con OC'].includes(r.estatus)],
+  ['en_compra','En compra',r=>r.estatus==='En compra'],
+  ['parcial','OC parcial',r=>r.estatus==='OC parcial'],
+  ['oc100','100% con OC',r=>r.estatus==='100% con OC'],
+  ['pagadas','Pagadas',r=>r.estatus==='Pagada'],
+  ['canceladas','Canceladas',r=>r.estatus==='Cancelada'],
+  ['todas','Todas',r=>true],
+];
+const myName=()=>S.me?.nombre||S.me?.email;
+
+/* AUTH */
+async function boot(){const {data:{session}}=await sb.auth.getSession();if(session&&await loadMe(session))return showApp();$('#v-login').classList.remove('hidden')}
+async function loadMe(session){
+  const {data}=await sb.from('usuario_app').select('*').eq('email',session.user.email.toLowerCase()).maybeSingle();
+  if(!data||!data.activo||!['compras','admin'].includes(data.rol)){await sb.auth.signOut();$('#l-err').textContent='Tu usuario no tiene acceso a Compras.';$('#l-err').classList.remove('hidden');return false}
+  S.me=data;return true;
+}
+$('#f-login').onsubmit=async e=>{e.preventDefault();$('#l-err').classList.add('hidden');$('#l-btn').disabled=true;
+  const {data,error}=await sb.auth.signInWithPassword({email:$('#l-email').value.trim(),password:$('#l-pass').value});$('#l-btn').disabled=false;
+  if(error){$('#l-err').textContent=error.message.includes('Invalid')?'Correo o contraseña incorrectos':error.message;$('#l-err').classList.remove('hidden');return}
+  if(await loadMe(data.session))showApp()};
+$('#b-out').onclick=async()=>{await sb.auth.signOut();location.reload()};
+
+function showApp(){
+  $('#v-login').classList.add('hidden');$('#v-app').classList.remove('hidden');
+  $('#me-name').textContent=myName();$('#me-rol').textContent=S.me.rol==='admin'?'Administrador':'Compras';
+  renderNav();viewList();
+  S.chList=sb.channel('lista').on('postgres_changes',{event:'*',schema:'ops',table:'requisicion'},debounce(()=>{if(S.view==='list')loadList()},700)).subscribe();
+}
+function renderNav(){
+  const c=k=>S.list.filter(FILTERS.find(f=>f[0]===k)[2]).length;
+  $('#nav').innerHTML=FILTERS.map(([k,l])=>`<button data-k="${k}" class="${S.view==='list'&&S.filter===k?'on':''}">${l}<span class="cnt">${S.list.length?c(k):''}</span></button>`).join('')
+   +(S.me.rol==='admin'?`<div class="sep"></div><button data-k="usuarios" class="${S.view==='usuarios'?'on':''}">👤 Usuarios</button>`:'');
+  $('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.k==='usuarios')return viewUsers();S.filter=b.dataset.k;if(S.view!=='list')viewList();else{renderNav();renderList()}});
+}
+
+/* LISTA */
+function viewList(){
+  S.view='list';
+  $('#content').innerHTML=`<div class="toolbar"><h2 id="lt"></h2><span class="live">En vivo</span>
+   <input class="i" id="q" placeholder="Buscar folio, obra, RFP, solicitante…" style="width:300px" value="${esc(S.q)}">
+   <select class="i" id="sort"><option value="fecha">Ordenar: fecha requerida</option><option value="nuevas">Más recientes</option><option value="viejas">Más antiguas</option></select>
+   <button class="btn ghost" id="rf">↻</button></div><div class="tbl-wrap" id="tw"><div class="spin"></div></div>`;
+  $('#sort').value=S.sort;
+  $('#q').oninput=debounce(e=>{S.q=e.target.value;renderList()},200);
+  $('#sort').onchange=e=>{S.sort=e.target.value;renderList()};
+  $('#rf').onclick=loadList;
+  loadList();
+}
+async function loadList(){
+  const {data,error}=await sb.from('v_requisicion').select('*').order('created_at',{ascending:false}).limit(1000);
+  if(error){$('#tw').innerHTML=`<div class="empty">Error: ${esc(error.message)}</div>`;return}
+  S.list=data;renderNav();renderList();
+}
+function renderList(){
+  const tw=$('#tw');if(!tw)return;
+  const f=FILTERS.find(x=>x[0]===S.filter);$('#lt').textContent=f[1];
+  const q=S.q.trim().toLowerCase();
+  let rows=S.list.filter(f[2]).filter(r=>!q||[r.folio,r.project_id,r.project_name,r.client_name,r.rfps,r.solicitante_nombre,r.solicitante_email,r.tomado_por].join(' ').toLowerCase().includes(q));
+  if(S.sort==='fecha')rows.sort((a,b)=>(a.proxima_fecha||'9999')<(b.proxima_fecha||'9999')?-1:(a.proxima_fecha||'9999')>(b.proxima_fecha||'9999')?1:a.created_at<b.created_at?-1:1);
+  if(S.sort==='viejas')rows.sort((a,b)=>a.created_at<b.created_at?-1:1);
+  if(!rows.length){tw.innerHTML='<div class="empty">No hay requisiciones en esta bandeja.</div>';return}
+  tw.innerHTML=`<table class="t"><thead><tr><th>Folio</th><th>Obra</th><th>Solicitó</th><th>Creada</th><th>Próx. fecha req.</th><th>Partidas</th><th>Con OC</th><th>Estatus</th><th>Atiende</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr class="click" data-id="${r.req_uuid}">
+    <td class="mono">${esc(r.folio)}${r.n_adjuntos?' <span title="Adjuntos">📎</span>':''}</td>
+    <td><b>${esc(r.project_id||'')}</b> ${esc(r.project_name)}<div class="mut small">${esc(r.client_name||'')} · ${esc(r.rfps||'')}</div></td>
+    <td>${esc(r.solicitante_nombre||r.solicitante_email)}</td>
+    <td>${fDate(r.created_at)}</td>
+    <td class="${dueCls(r.proxima_fecha)}">${fDate(r.proxima_fecha)}</td>
+    <td class="counts">${r.n_pendiente?`<span class="st-Pendiente" title="Pendientes">${r.n_pendiente}</span>`:''}${r.n_en_compra?`<span class="st-En-compra" title="En compra">${r.n_en_compra}</span>`:''}${r.n_en_pago?`<span class="st-En-pago" title="En pago">${r.n_en_pago}</span>`:''}${r.n_pagado?`<span class="st-Pagado" title="Pagadas">${r.n_pagado}</span>`:''} <span class="mut">/${r.total_items}</span></td>
+    <td style="min-width:90px"><div class="small">${r.pct_oc>=100?'✅ 100%':Math.round(r.pct_oc)+'%'}</div><div class="prog"><div style="width:${Math.min(100,r.pct_oc)}%"></div></div></td>
+    <td>${chip(r.estatus)}</td>
+    <td class="small">${esc(r.tomado_por||'—')}</td></tr>`).join('')}</tbody></table>`;
+  tw.querySelectorAll('tr.click').forEach(tr=>tr.onclick=()=>openDetail(tr.dataset.id));
+}
+
+/* DETALLE */
+async function openDetail(id){
+  closeDetail();S.sel=new Set();
+  const bg=document.createElement('div');bg.className='drawer-bg';bg.id='dbg';bg.onclick=closeDetail;
+  const dr=document.createElement('div');dr.className='drawer';dr.id='drw';dr.innerHTML='<div class="spin"></div>';
+  document.body.append(bg,dr);
+  document.addEventListener('keydown',escClose);
+  await loadDetail(id);
+  const rl=debounce(()=>loadDetail(id),400);
+  S.chDet=sb.channel('det-'+id)
+   .on('postgres_changes',{event:'*',schema:'ops',table:'requisicion_item',filter:`req_uuid=eq.${id}`},rl)
+   .on('postgres_changes',{event:'INSERT',schema:'ops',table:'requisicion_evento',filter:`req_uuid=eq.${id}`},rl).subscribe();
+}
+function escClose(e){if(e.key==='Escape'&&!$('.modal-bg'))closeDetail()}
+function closeDetail(){$('#dbg')?.remove();$('#drw')?.remove();if(S.chDet){sb.removeChannel(S.chDet);S.chDet=null}document.removeEventListener('keydown',escClose);S.detail=null}
+
+async function loadDetail(id){
+  const [r,it,sp,ad,ev]=await Promise.all([
+    sb.from('v_requisicion').select('*').eq('req_uuid',id).maybeSingle(),
+    sb.from('requisicion_item').select('*,links:oc_requisicion_item(id,cantidad,auto,oc:oc_uuid(oc_uuid,oc_number,status,proveedor_nombre_corto,total))').eq('req_uuid',id).order('partida'),
+    sb.from('requisicion_rfp').select('pct,rfp_uuid,project_uuid,rfp:rfp_uuid(rfp_number,titulo),project:project_uuid(project_id,project_name)').eq('req_uuid',id),
+    sb.from('requisicion_adjunto').select('*').eq('req_uuid',id).order('created_at'),
+    sb.from('requisicion_evento').select('*').eq('req_uuid',id).order('created_at',{ascending:false}).limit(200)
+  ]);
+  const dr=$('#drw');if(!dr)return;
+  if(!r.data){dr.innerHTML='<div class="empty">No encontrada</div>';return}
+  const items=it.data||[];
+  const ids=items.filter(x=>x.split_especial).map(x=>x.item_uuid);
+  const isp=ids.length?(await sb.from('requisicion_item_rfp').select('item_uuid,pct,rfp_uuid,rfp:rfp_uuid(rfp_number)').in('item_uuid',ids)).data||[]:[];
+  S.detail={q:r.data,items,split:sp.data||[],adj:ad.data||[],ev:ev.data||[],isp};
+  // limpia selección de partidas que ya no existen
+  S.sel=new Set([...S.sel].filter(x=>items.some(i=>i.item_uuid===x)));
+  renderDetail();
+}
+function adjThumbs(list){return list.length?`<div class="thumbs">${list.map(a=>a.mime?.startsWith('image/')?`<a class="thumb" target="_blank" href="${esc(a.url)}" title="${esc(a.nombre)}" style="background-image:url('${esc(a.url)}')"></a>`:`<a class="thumb" target="_blank" href="${esc(a.url)}" title="${esc(a.nombre)}">📄</a>`).join('')}</div>`:''}
+function renderDetail(){
+  const {q,items,split,adj,ev,isp}=S.detail;const dr=$('#drw');
+  const addr=[q.project_address,q.project_city_state].filter(Boolean).join(', ');
+  const scroll=dr.querySelector('.db')?.scrollTop||0;
+  dr.innerHTML=`<div class="dh"><div><div class="folio">${esc(q.folio)}</div><div style="margin-top:4px"><b>${esc(q.project_id||'')}</b> ${esc(q.project_name)} <span class="mut">· ${esc(q.client_name||'')}</span></div>
+    <div class="mut small" style="margin-top:3px">Pidió ${esc(q.solicitante_nombre||q.solicitante_email)} · ${fDT(q.created_at)}</div></div>
+    <div style="margin-left:24px;min-width:200px"><div class="row" style="display:flex;gap:8px;align-items:center">${chip(q.estatus)} ${q.pct_oc>=100?'<span class="badge-ok">✅ 100% con OC</span>':''}</div>
+     <div class="small" style="margin-top:8px">Con OC: <b>${Math.round(q.pct_oc)}%</b></div><div class="prog"><div style="width:${Math.min(100,q.pct_oc)}%"></div></div>
+     <div class="small" style="margin-top:6px">Pagado: <b>${Math.round(q.pct_pagado)}%</b></div><div class="prog g"><div style="width:${Math.min(100,q.pct_pagado)}%"></div></div></div>
+    <button class="close" onclick="closeDetail()">✕</button></div>
+  <div class="db">
+   <div class="grid3">
+    <div class="card"><div class="small mut" style="margin-bottom:6px">RFP / split general</div>${split.map(s=>`<div style="display:flex;justify-content:space-between"><span><span class="mono">${esc(s.rfp?.rfp_number||'')}</span> <span class="mut small">${esc(s.rfp?.titulo||'')}${s.project_uuid!==q.project_uuid?' · '+esc(s.project?.project_name||''):''}</span></span><b>${s.pct}%</b></div>`).join('')}</div>
+    <div class="card"><div class="small mut" style="margin-bottom:6px">Notas</div><div style="white-space:pre-wrap">${esc(q.notas||'—')}</div><div class="small mut" style="margin-top:8px">Dirección de la obra</div><div class="small">${esc(addr||'—')}</div></div>
+    <div class="card"><div class="small mut" style="margin-bottom:6px">Adjuntos generales</div>${adjThumbs(adj.filter(a=>!a.item_uuid))||'<span class="mut">—</span>'}</div>
+   </div>
+   <div class="actions" id="acts"></div>
+   <table class="t"><thead><tr><th><input type="checkbox" id="ckall"></th><th>#</th><th>Descripción</th><th>Cant.</th><th>Fecha req.</th><th>Entrega</th><th>Estatus</th><th>OC</th><th>Adj.</th></tr></thead><tbody>
+   ${items.map(x=>{const s=isp.filter(y=>y.item_uuid===x.item_uuid);const links=x.links||[];return`<tr class="${S.sel.has(x.item_uuid)?'sel':''}">
+     <td><input type="checkbox" class="ck" data-id="${x.item_uuid}" ${S.sel.has(x.item_uuid)?'checked':''}></td>
+     <td class="mono">${x.partida}</td>
+     <td><b style="font-weight:500">${esc(x.descripcion)}</b>${x.especificacion?`<div class="mut small">${esc(x.especificacion)}</div>`:''}${x.notas?`<div class="small">📝 ${esc(x.notas)}</div>`:''}${s.length?`<div class="small" style="color:var(--amber)">Split: ${s.map(y=>esc(y.rfp?.rfp_number||'')+' '+y.pct+'%').join(' · ')}</div>`:''}${x.cancelado?`<div class="small" style="color:var(--red)">Cancelada: ${esc(x.cancelado_motivo||'')}</div>`:''}</td>
+     <td style="white-space:nowrap"><b>${fNum(x.cantidad)}</b> ${esc(x.unidad||'')}${x.cantidad_con_oc>0?`<div class="small mut">${fNum(Math.min(x.cantidad_con_oc,x.cantidad))} con OC</div>`:''}</td>
+     <td class="${['Pendiente','En compra'].includes(x.estatus)?dueCls(x.fecha_requerida):''}" style="white-space:nowrap">${fDate(x.fecha_requerida)}</td>
+     <td class="small" style="max-width:220px">${ENT[x.entrega_tipo]}${x.entrega_tipo!=='obra'?`<div>${esc(x.entrega_direccion||'')}</div>${x.entrega_contacto||x.entrega_telefono?`<div class="mut">${esc(x.entrega_contacto||'')} ${esc(x.entrega_telefono||'')}</div>`:''}${x.entrega_notas?`<div class="mut">${esc(x.entrega_notas)}</div>`:''}`:''}</td>
+     <td>${chip(x.estatus)}${x.tomado_por?`<div class="small mut" style="margin-top:3px">${esc(x.tomado_por)}</div>`:''}</td>
+     <td class="small">${links.map(l=>`<div style="white-space:nowrap"><span class="mono">${esc(l.oc?.oc_number||'')}</span> · ${fNum(l.cantidad)} <span class="mut">${esc(l.oc?.status||'')}</span> <a href="#" data-unl="${l.id}" title="Desligar" style="color:var(--red);text-decoration:none">✕</a></div>`).join('')||'—'}</td>
+     <td>${adjThumbs(adj.filter(a=>a.item_uuid===x.item_uuid))}</td></tr>`}).join('')}
+   </tbody></table>
+   <div class="card" style="margin-top:14px"><div class="small mut" style="margin-bottom:6px">Historial</div><div class="tl">${ev.map(e=>`<div class="e"><span>${esc(e.detalle)}</span> <span class="mut small">· ${esc(e.usuario||'')} · ${fDT(e.created_at)}</span></div>`).join('')}</div></div>
+  </div>`;
+  dr.querySelector('.db').scrollTop=scroll;
+  dr.querySelectorAll('.ck').forEach(c=>c.onchange=()=>{c.checked?S.sel.add(c.dataset.id):S.sel.delete(c.dataset.id);c.closest('tr').classList.toggle('sel',c.checked);renderActions()});
+  $('#ckall').onchange=e=>{items.forEach(x=>e.target.checked?S.sel.add(x.item_uuid):S.sel.delete(x.item_uuid));renderDetail()};
+  dr.querySelectorAll('[data-unl]').forEach(a=>a.onclick=async e=>{e.preventDefault();if(!confirm('¿Desligar esta OC de la partida?'))return;
+    const {error}=await sb.from('oc_requisicion_item').delete().eq('id',a.dataset.unl);if(error)toast(error.message,true)});
+  renderActions();
+}
+function renderActions(){
+  const {items}=S.detail;const sel=items.filter(x=>S.sel.has(x.item_uuid));const scope=sel.length?sel:items;
+  const n=sel.length;const lbl=n?`${n} seleccionada${n>1?'s':''}`:'Toda la requisición';
+  const canTake=scope.some(x=>x.estatus==='Pendiente');
+  const canRelease=scope.some(x=>x.estatus==='En compra'&&x.cantidad_con_oc==0);
+  const canCancel=scope.some(x=>!x.cancelado&&x.estatus!=='Pagado');
+  const canReact=scope.some(x=>x.cancelado);
+  const canLink=scope.some(x=>!x.cancelado&&x.cantidad_con_oc<x.cantidad);
+  $('#acts').innerHTML=`<b style="margin-right:6px">${lbl}:</b>
+   <button class="btn" id="a-take" ${canTake?'':'disabled'}>✋ Tomar (en compra)</button>
+   <button class="btn sec" id="a-link" ${canLink?'':'disabled'}>🔗 Ligar a OC</button>
+   <button class="btn ghost" id="a-copy">📋 Copiar para OC</button>
+   <button class="btn ghost" id="a-rel" ${canRelease?'':'disabled'}>Soltar</button>
+   <button class="btn danger" id="a-can" ${canCancel?'':'disabled'}>Cancelar</button>
+   ${canReact?'<button class="btn grn" id="a-react">Reactivar</button>':''}
+   <span class="mut small" style="margin-left:auto">"En pago" y "Pagado" cambian solos según la OC</span>`;
+  $('#a-take').onclick=()=>bulkUpdate(scope.filter(x=>x.estatus==='Pendiente'),{tomado_por:myName(),tomado_at:new Date().toISOString()},'tomadas');
+  $('#a-rel').onclick=()=>bulkUpdate(scope.filter(x=>x.estatus==='En compra'&&x.cantidad_con_oc==0),{tomado_por:null,tomado_at:null},'liberadas');
+  $('#a-can').onclick=()=>{const m=prompt('Motivo de cancelación:');if(!m)return;bulkUpdate(scope.filter(x=>!x.cancelado&&x.estatus!=='Pagado'),{cancelado:true,cancelado_por:myName(),cancelado_motivo:m,cancelado_at:new Date().toISOString()},'canceladas')};
+  const r=$('#a-react');if(r)r.onclick=()=>bulkUpdate(scope.filter(x=>x.cancelado),{cancelado:false,cancelado_por:myName(),cancelado_motivo:null,cancelado_at:null},'reactivadas');
+  $('#a-link').onclick=()=>linkOC(scope.filter(x=>!x.cancelado&&x.cantidad_con_oc<x.cantidad));
+  $('#a-copy').onclick=()=>copyForOC(scope.filter(x=>!x.cancelado));
+}
+async function bulkUpdate(list,patch,verb){
+  if(!list.length)return;
+  const {error}=await sb.from('requisicion_item').update(patch).in('item_uuid',list.map(x=>x.item_uuid));
+  if(error)return toast(error.message,true);
+  toast(`${list.length} partida(s) ${verb}`);S.sel.clear();loadDetail(S.detail.q.req_uuid);
+}
+function splitFor(items){
+  // % ponderado por cantidad de partidas (los precios se conocen hasta la OC)
+  const {split,isp}=S.detail;const acc={};
+  items.forEach(x=>{const s=isp.filter(y=>y.item_uuid===x.item_uuid);(s.length?s:split).forEach(y=>{const k=y.rfp?.rfp_number||y.rfp_uuid;acc[k]=(acc[k]||0)+Number(y.pct)/items.length})});
+  return acc;
+}
+async function copyForOC(list){
+  if(!list.length)return;
+  const {q}=S.detail;
+  const lines=list.map(x=>[fNum(x.cantidad-Math.min(x.cantidad_con_oc,x.cantidad))||fNum(x.cantidad),x.unidad||'',x.descripcion+(x.especificacion?' - '+x.especificacion:'')].join('\t'));
+  const sp=splitFor(list);
+  const ents=[...new Set(list.map(x=>x.entrega_tipo==='obra'?'Obra':x.entrega_direccion))];
+  const txt=`Requisición: ${q.folio}\nObra: ${q.project_id||''} ${q.project_name}\nSplit: ${Object.entries(sp).map(([k,v])=>k+' '+(+v.toFixed(2))+'%').join(', ')}\nEntrega: ${ents.join(' | ')}\nFecha requerida: ${fDate(list.map(x=>x.fecha_requerida).filter(Boolean).sort()[0])}\n\nCantidad\tUnidad\tDescripción\n${lines.join('\n')}`;
+  await navigator.clipboard.writeText(txt);toast('Copiado. Pega en tu app de OC; usa el folio '+q.folio+' en "Requisición".');
+}
+function modal(html,onMount){const b=document.createElement('div');b.className='modal-bg';b.innerHTML=`<div class="modal">${html}</div>`;b.onclick=e=>{if(e.target===b)b.remove()};document.body.appendChild(b);onMount&&onMount(b);return b}
+function linkOC(list){
+  if(!list.length)return;
+  const fechas=[...new Set(list.map(x=>x.fecha_requerida||''))],ents=[...new Set(list.map(x=>x.entrega_tipo+'|'+(x.entrega_direccion||'')))];
+  const m=modal(`<h3>Ligar partidas a una orden de compra</h3>
+   ${fechas.length>1||ents.length>1?`<div class="warn">Las partidas seleccionadas tienen ${fechas.length>1?'fechas':''}${fechas.length>1&&ents.length>1?' y ':''}${ents.length>1?'lugares de entrega':''} distintos. La OC solo guarda una fecha y una dirección; considera separarlas en OC diferentes.</div>`:''}
+   <label class="f">Buscar OC (número, proveedor u obra)</label><input class="i" id="oq" style="width:100%" placeholder="Ej. OC-G-05378">
+   <div id="ores" style="margin-top:8px;max-height:200px;overflow:auto"></div>
+   <div id="osel"></div>
+   <label class="f">Cantidad que cubre esta OC</label>
+   <table class="t"><thead><tr><th>#</th><th>Descripción</th><th>Pendiente de OC</th><th>Cubre</th></tr></thead><tbody>
+   ${list.map(x=>{const rem=+(x.cantidad-x.cantidad_con_oc).toFixed(3);return`<tr><td class="mono">${x.partida}</td><td>${esc(x.descripcion)}</td><td>${fNum(rem)} ${esc(x.unidad||'')}</td><td><input class="i qty" data-id="${x.item_uuid}" value="${rem}" style="width:100px;text-align:right"></td></tr>`}).join('')}
+   </tbody></table>
+   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="oc-x">Cancelar</button><button class="btn" id="oc-ok" disabled>Ligar</button></div>`,b=>{
+    let chosen=null;const {q}=S.detail;
+    const search=debounce(async()=>{const t=b.querySelector('#oq').value.trim();if(t.length<2){b.querySelector('#ores').innerHTML='';return}
+      const {data}=await sb.from('oc').select('oc_uuid,oc_number,status,proveedor_nombre_corto,project_name,total,oc_date,requisition_number').or(`oc_number.ilike.%${t}%,proveedor_nombre_corto.ilike.%${t}%,project_name.ilike.%${t}%`).order('created_at',{ascending:false}).limit(15);
+      b.querySelector('#ores').innerHTML=(data||[]).map(o=>`<div class="card" style="padding:8px 10px;margin-bottom:6px;cursor:pointer" data-o='${esc(JSON.stringify(o))}'><span class="mono"><b>${esc(o.oc_number)}</b></span> · ${esc(o.proveedor_nombre_corto||'')} · ${esc(o.project_name||'')} · ${fMoney(o.total)} · ${chip(o.status)}${o.requisition_number?` <span class="mut small">Req: ${esc(o.requisition_number)}</span>`:''}</div>`).join('')||'<div class="mut small">Sin resultados</div>';
+      b.querySelectorAll('[data-o]').forEach(el=>el.onclick=()=>{chosen=JSON.parse(el.dataset.o);b.querySelector('#osel').innerHTML=`<div class="card" style="border-color:var(--acc);background:var(--acc-lt)">Seleccionada: <b class="mono">${esc(chosen.oc_number)}</b> · ${esc(chosen.proveedor_nombre_corto||'')} · ${chip(chosen.status)}${chosen.status==='Cancelado'?'<div class="warn">Esta OC está cancelada; no contará.</div>':''}</div>`;b.querySelector('#ores').innerHTML='';b.querySelector('#oc-ok').disabled=false});
+    },250);
+    b.querySelector('#oq').oninput=search;b.querySelector('#oq').focus();
+    b.querySelector('#oc-x').onclick=()=>b.remove();
+    b.querySelector('#oc-ok').onclick=async()=>{
+      const rows=[...b.querySelectorAll('.qty')].map(i=>({oc_uuid:chosen.oc_uuid,item_uuid:i.dataset.id,cantidad:Number(i.value.replace(',','.')),creado_por:myName()})).filter(r=>r.cantidad>0);
+      if(!rows.length)return toast('Pon al menos una cantidad',true);
+      const {error}=await sb.from('oc_requisicion_item').upsert(rows,{onConflict:'oc_uuid,item_uuid'});
+      if(error)return toast(error.message,true);
+      if(!chosen.requisition_number) await sb.from('oc').update({requisition_number:q.folio}).eq('oc_uuid',chosen.oc_uuid);
+      b.remove();toast(`${rows.length} partida(s) ligadas a ${chosen.oc_number}`);S.sel.clear();loadDetail(q.req_uuid);
+    };
+  });
+}
+
+/* USUARIOS (admin) */
+async function viewUsers(){
+  S.view='usuarios';renderNav();
+  $('#content').innerHTML=`<div class="toolbar"><h2>Usuarios</h2><input class="i" id="uq" placeholder="Buscar" style="width:240px"><button class="btn" id="u-new">＋ Nuevo usuario</button></div><div class="tbl-wrap" id="uw"><div class="spin"></div></div>`;
+  const [{data:us},{data:rs}]=await Promise.all([sb.from('usuario_app').select('*').order('nombre'),sb.from('resident').select('resident_id,full_name,email,activo').order('full_name')]);
+  S.residents=rs||[];
+  const draw=()=>{const q=$('#uq').value.toLowerCase();
+    $('#uw').innerHTML=`<table class="t"><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Residente ligado</th><th>Activo</th><th></th></tr></thead><tbody>${(us||[]).filter(u=>!q||(u.nombre+' '+u.email).toLowerCase().includes(q)).map(u=>`<tr>
+     <td>${esc(u.nombre||'')}</td><td class="mono small">${esc(u.email)}</td>
+     <td><select class="i" data-rol="${esc(u.email)}">${['residente','compras','admin'].map(r=>`<option ${u.rol===r?'selected':''}>${r}</option>`).join('')}</select></td>
+     <td class="small">${esc(S.residents.find(r=>r.resident_id===u.resident_id)?.full_name||'—')}</td>
+     <td><input type="checkbox" data-act="${esc(u.email)}" ${u.activo?'checked':''}></td>
+     <td><button class="btn sec sm" data-pw="${esc(u.email)}">🔑 Contraseña</button></td></tr>`).join('')}</tbody></table>
+     <p class="mut small">“Contraseña” crea el acceso del usuario (si no lo tiene) o le pone una contraseña nueva. Compártela por un medio privado y pídele que no la reutilice.</p>`;
+    $('#uw').querySelectorAll('[data-rol]').forEach(s=>s.onchange=async()=>{const {error}=await sb.from('usuario_app').update({rol:s.value}).eq('email',s.dataset.rol);toast(error?error.message:'Rol actualizado',!!error)});
+    $('#uw').querySelectorAll('[data-act]').forEach(c=>c.onchange=async()=>{const {error}=await sb.from('usuario_app').update({activo:c.checked}).eq('email',c.dataset.act);toast(error?error.message:'Actualizado',!!error)});
+    $('#uw').querySelectorAll('[data-pw]').forEach(b=>b.onclick=()=>setPassword(b.dataset.pw));
+  };
+  $('#uq').oninput=draw;draw();
+  $('#u-new').onclick=()=>modal(`<h3>Nuevo usuario</h3>
+    <label class="f">Residente (opcional, para ligar sus obras)</label><select class="i" id="nr" style="width:100%"><option value="">— Ninguno —</option>${S.residents.filter(r=>r.activo).map(r=>`<option value="${r.resident_id}" data-e="${esc(r.email||'')}" data-n="${esc(r.full_name)}">${esc(r.full_name)}</option>`).join('')}</select>
+    <label class="f">Nombre</label><input class="i" id="nn" style="width:100%">
+    <label class="f">Correo</label><input class="i" id="ne" type="email" style="width:100%">
+    <label class="f">Rol</label><select class="i" id="nrol" style="width:100%"><option>residente</option><option>compras</option><option>admin</option></select>
+    <label class="f">Contraseña inicial (mín. 8)</label><input class="i" id="np" style="width:100%" autocomplete="new-password">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="nx">Cancelar</button><button class="btn" id="nok">Crear</button></div>`,b=>{
+      b.querySelector('#nr').onchange=e=>{const o=e.target.selectedOptions[0];if(o.value){b.querySelector('#nn').value=o.dataset.n;b.querySelector('#ne').value=o.dataset.e}};
+      b.querySelector('#nx').onclick=()=>b.remove();
+      b.querySelector('#nok').onclick=async()=>{
+        const email=b.querySelector('#ne').value.trim().toLowerCase(),pw=b.querySelector('#np').value;
+        if(!email||pw.length<8)return toast('Correo y contraseña (mín. 8) son obligatorios',true);
+        const {error}=await sb.from('usuario_app').upsert({email,nombre:b.querySelector('#nn').value.trim(),rol:b.querySelector('#nrol').value,resident_id:b.querySelector('#nr').value||null,activo:true});
+        if(error)return toast(error.message,true);
+        const r=await callAdmin({action:'create',email,password:pw});if(r.error)return toast(r.error,true);
+        b.remove();toast('Usuario creado');viewUsers();
+      };
+    });
+}
+async function callAdmin(body){
+  const {data,error}=await sb.functions.invoke('req-usuarios',{body});
+  if(error){let msg=error.message;try{msg=(await error.context.json()).error||msg}catch(e){}return{error:msg}}
+  return data;
+}
+function setPassword(email){
+  modal(`<h3>Contraseña de ${esc(email)}</h3><p class="mut small">Si el usuario aún no tiene acceso, se le crea.</p><label class="f">Nueva contraseña (mín. 8)</label><input class="i" id="pp" style="width:100%" autocomplete="new-password">
+   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="px">Cancelar</button><button class="btn" id="pok">Guardar</button></div>`,b=>{
+    b.querySelector('#px').onclick=()=>b.remove();
+    b.querySelector('#pok').onclick=async()=>{const pw=b.querySelector('#pp').value;if(pw.length<8)return toast('Mínimo 8 caracteres',true);
+      const r=await callAdmin({action:'set_password',email,password:pw});if(r.error)return toast(r.error,true);b.remove();toast(r.creado?'Acceso creado':'Contraseña actualizada')};
+  });
+}
+
+sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&S.me)location.reload()});
+boot();
+</script>
+</body>
+</html>

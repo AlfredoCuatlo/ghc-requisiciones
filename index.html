@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B4F72">
+<title>Requisiciones · GHC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#F5F4F0;--surface:#FFF;--bdr:#D8D5CC;--txt:#18170E;--mut:#6A6760;
+  --acc:#1B4F72;--acc-lt:#EAF2F8;--acc-dk:#163F5C;
+  --grn:#1A5C38;--grn-lt:#E8F5EE;--amber:#7A4F00;--amber-bg:#FEF3DC;--red:#991B1B;--red-bg:#FEE2E2;
+  --vio:#5B3E8F;--vio-bg:#EFE9F8;
+  --sans:'Sora',system-ui,sans-serif;--mono:'Fira Code',monospace;
+  --r:12px;--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15px;line-height:1.4}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
+.hidden{display:none!important}
+.mono{font-family:var(--mono)}
+.mut{color:var(--mut)}
+.small{font-size:12.5px}
+a{color:var(--acc)}
+
+/* layout */
+header.top{position:sticky;top:0;z-index:20;background:var(--acc);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;min-height:56px}
+header.top h1{font-size:17px;margin:0;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header.top .iconbtn{background:transparent;border:0;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
+header.top .iconbtn:active{background:rgba(255,255,255,.15)}
+main{padding:14px 14px calc(110px + var(--safe-b));max-width:720px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.row{display:flex;gap:10px;align-items:center}
+.between{justify-content:space-between}
+.wrap{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.sec-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin:18px 2px 8px}
+
+/* inputs */
+label.f{display:block;font-size:13px;font-weight:500;color:var(--mut);margin:10px 0 4px}
+input.i,select.i,textarea.i{width:100%;border:1px solid var(--bdr);border-radius:10px;padding:12px;background:#fff;min-height:48px}
+textarea.i{min-height:64px;resize:vertical}
+input.i:focus,select.i:focus,textarea.i:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--acc)}
+.search{position:relative}
+.search input{padding-left:40px}
+.search:before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.6}
+
+/* buttons */
+.btn{border:0;border-radius:12px;padding:0 18px;min-height:50px;font-weight:600;background:var(--acc);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{background:var(--acc-dk)}
+.btn:disabled{opacity:.5}
+.btn.sec{background:var(--acc-lt);color:var(--acc)}
+.btn.ghost{background:transparent;color:var(--acc);border:1px solid var(--bdr)}
+.btn.danger{background:var(--red-bg);color:var(--red)}
+.btn.block{width:100%}
+.btn.sm{min-height:40px;padding:0 12px;font-size:14px;border-radius:10px}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--bdr);padding:10px 14px calc(10px + var(--safe-b));display:flex;gap:10px}
+.bar .btn{flex:1}
+.fab{position:fixed;right:18px;bottom:calc(22px + var(--safe-b));z-index:30;height:58px;padding:0 22px;border-radius:29px;box-shadow:0 6px 18px rgba(27,79,114,.35)}
+
+/* tabs */
+.tabs{display:flex;background:#E9E7E1;border-radius:12px;padding:4px;gap:4px;margin-bottom:12px}
+.tabs button{flex:1;border:0;background:transparent;border-radius:9px;min-height:42px;font-weight:600;font-size:14px;color:var(--mut)}
+.tabs button.on{background:#fff;color:var(--acc);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.st-Pendiente{background:#EEEDE8;color:#55534C}
+.st-En-compra{background:var(--amber-bg);color:var(--amber)}
+.st-En-pago,.st-OC-parcial{background:var(--acc-lt);color:var(--acc)}
+.st-100-con-OC{background:var(--vio-bg);color:var(--vio)}
+.st-Pagado,.st-Pagada{background:var(--grn-lt);color:var(--grn)}
+.st-Cancelado,.st-Cancelada{background:var(--red-bg);color:var(--red)}
+.prog{height:6px;background:#EEEDE8;border-radius:3px;overflow:hidden;margin-top:8px}
+.prog>div{height:100%;background:var(--acc);border-radius:3px}
+.prog.g>div{background:var(--grn)}
+
+/* list */
+.list-item{display:block;color:inherit;text-decoration:none;background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:13px 14px;margin-bottom:10px;cursor:pointer}
+.list-item:active{background:#FAFAF8}
+.pick{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surface);margin-bottom:8px;cursor:pointer}
+.pick.on{border-color:var(--acc);background:var(--acc-lt)}
+.pick .ck{width:24px;height:24px;border-radius:7px;border:2px solid var(--bdr);flex:none;display:grid;place-items:center;font-size:15px;color:#fff;margin-top:1px}
+.pick.on .ck{background:var(--acc);border-color:var(--acc)}
+.pick.radio .ck{border-radius:50%}
+
+/* steps */
+.steps{display:flex;gap:6px;margin:2px 0 14px}
+.steps div{flex:1;height:5px;border-radius:3px;background:#E1DED6}
+.steps div.on{background:var(--acc)}
+.step-h{font-size:19px;font-weight:700;margin:0 0 2px}
+
+/* item card */
+.item{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px 14px;margin-bottom:12px}
+.item .n{font-family:var(--mono);font-size:12px;background:var(--acc);color:#fff;border-radius:6px;padding:2px 7px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.entrega{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px dashed var(--bdr);background:#FBFAF7;border-radius:10px;padding:10px 12px;min-height:48px;margin-top:10px}
+.entrega b{font-weight:600}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.thumb{text-decoration:none;position:relative;width:68px;height:68px;border-radius:10px;border:1px solid var(--bdr);background:#F0EEE8 center/cover no-repeat;display:grid;place-items:center;font-size:11px;text-align:center;overflow:hidden;color:var(--mut)}
+.thumb .x{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:50%;width:22px;height:22px;font-size:13px;line-height:1}
+.thumb .pdf{font-size:22px}
+.minirow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* sheet */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:8px 16px calc(16px + var(--safe-b))}
+.sheet .grab{width:42px;height:5px;background:#D5D2C9;border-radius:3px;margin:4px auto 10px}
+.sheet h3{margin:0 0 10px;font-size:17px}
+
+/* misc */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + var(--safe-b));background:#18170E;color:#fff;padding:12px 18px;border-radius:12px;z-index:80;font-size:14px;max-width:92vw;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast.err{background:var(--red)}
+.empty{text-align:center;color:var(--mut);padding:40px 10px}
+.spin{width:22px;height:22px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
+.spin.d{border-color:#DDD;border-top-color:var(--acc)}
+@keyframes sp{to{transform:rotate(360deg)}}
+.center{display:grid;place-items:center;padding:30px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--mut)}
+.kv dd{margin:0}
+.tl{border-left:2px solid var(--bdr);margin-left:6px;padding-left:14px}
+.tl .e{position:relative;padding:0 0 12px}
+.tl .e:before{content:"";position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--acc)}
+.sum-ok{color:var(--grn);font-weight:600}
+.sum-bad{color:var(--red);font-weight:600}
+.pctin{width:84px!important;text-align:right;min-height:42px!important;padding:8px 10px!important}
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;max-width:420px;margin:0 auto}
+.logo{width:64px;height:64px;border-radius:16px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:22px;margin-bottom:16px}
+.folio-big{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--acc);letter-spacing:.02em}
+.warn{background:var(--amber-bg);color:var(--amber);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--grn)}
+.live:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--grn);animation:pl 1.6s infinite}
+@keyframes pl{50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="v-login" class="hidden">
+  <div class="login-wrap">
+    <div class="logo">GHC</div>
+    <h2 style="margin:0 0 4px">Requisiciones</h2>
+    <p class="mut" style="margin:0 0 20px">Entra con tu correo y contraseña.</p>
+    <form id="f-login">
+      <label class="f">Correo</label>
+      <input class="i" id="l-email" type="email" autocomplete="username" inputmode="email" required>
+      <label class="f">Contraseña</label>
+      <input class="i" id="l-pass" type="password" autocomplete="current-password" required>
+      <p id="l-err" class="sum-bad small hidden" style="margin:10px 0 0"></p>
+      <button class="btn block" style="margin-top:18px" id="l-btn">Entrar</button>
+    </form>
+    <p class="mut small" style="margin-top:18px">¿No tienes contraseña o la olvidaste? Pídela al área de Compras.</p>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="v-app" class="hidden">
+  <header class="top">
+    <button class="iconbtn hidden" id="h-back" aria-label="Regresar">←</button>
+    <h1 id="h-title">Requisiciones</h1>
+    <button class="iconbtn" id="h-menu" aria-label="Menú">⋮</button>
+  </header>
+  <main id="main"></main>
+  <div id="bar" class="bar hidden"></div>
+</section>
+
+<script>
+/* ================= CONFIG ================= */
+const SB_URL='https://fssbqencxpmmjmxgnmpe.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzc2JxZW5jeHBtbWpteGdubXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NzM5NzUsImV4cCI6MjA3MDI0OTk3NX0.fsWpdmHPaKYn8P767fo5rqPHkBsQbDjplXs2xbGg9MY';
+const BUCKET='requisiciones';
+const PDF_KEEP_MAX=3*1024*1024, FILE_MAX=20*1024*1024;
+const UNIDADES=['Pza','Bulto','Saco','Kg','Ton','m','m²','m³','Lt','Galón','Cubeta','Caja','Rollo','Tramo','Hoja','Juego','Paquete','Lote','Servicio','Viaje'];
+const sb=supabase.createClient(SB_URL,SB_KEY,{db:{schema:'ops'},auth:{persistSession:true,autoRefreshToken:true,storageKey:'ghc-req-auth'}});
+
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c=='x'?r:(r&3|8)).toString(16)});
+const todayISO=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const fDate=s=>{if(!s)return'—';const d=new Date(s.length<=10?s+'T12:00:00':s);return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})};
+const fDT=s=>s?new Date(s).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+const fNum=n=>Number(n||0).toLocaleString('es-MX',{maximumFractionDigits:3});
+const fBytes=b=>b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+const stCls=s=>'st-'+String(s||'').replace(/%/g,'').replace(/\s+/g,'-');
+const chip=s=>`<span class="chip ${stCls(s)}">${esc(s)}</span>`;
+function toast(msg,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),err?5000:2600)}
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
+const ENTREGA_LBL={obra:'Entrega en obra',otra_direccion:'Entrega en otra dirección',recoger:'Recoger en otro lugar'};
+const ENTREGA_ICO={obra:'📍',otra_direccion:'🚚',recoger:'🏬'};
+function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`))return res();const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('No se pudo cargar '+src));document.head.appendChild(s)})}
+
+/* ===== IndexedDB para guardar archivos del borrador ===== */
+const IDB={db:null,
+  open(){return this.db?Promise.resolve(this.db):new Promise((res,rej)=>{const r=indexedDB.open('ghc-req',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>{this.db=r.result;res(this.db)};r.onerror=()=>rej(r.error)})},
+  async put(k,v){const db=await this.open();return new Promise((res,rej)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').put(v,k);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})},
+  async get(k){const db=await this.open();return new Promise((res,rej)=>{const r=db.transaction('files').objectStore('files').get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
+  async del(k){const db=await this.open();return new Promise(res=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').delete(k);tx.oncomplete=res;tx.onerror=res})}
+};
+
+/* ===== Compresión de archivos ===== */
+async function compressImage(file){
+  let bmp;
+  try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){bmp=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=URL.createObjectURL(file)})}
+  const MAX=1600,w=bmp.width,h=bmp.height,k=Math.min(1,MAX/Math.max(w,h));
+  const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.72));
+  const name=(file.name||'foto').replace(/\.[^.]+$/,'')+'.jpg';
+  return (blob&&blob.size<file.size)?{blob,name,mime:'image/jpeg'}:{blob:file,name:file.name||name,mime:file.type||'image/jpeg'};
+}
+async function compressPdf(file,onProgress){
+  if(file.size<=PDF_KEEP_MAX) return {blob:file,name:file.name,mime:'application/pdf'};
+  try{
+    await loadScript('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    const src=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+    if(src.numPages>60) throw new Error('muchas páginas');
+    const out=await PDFLib.PDFDocument.create();
+    for(let p=1;p<=src.numPages;p++){
+      onProgress&&onProgress(p,src.numPages);
+      const page=await src.getPage(p);const vp1=page.getViewport({scale:1});
+      const scale=Math.min(2,1400/vp1.width);const vp=page.getViewport({scale});
+      const c=document.createElement('canvas');c.width=Math.round(vp.width);c.height=Math.round(vp.height);
+      const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+      await page.render({canvasContext:ctx,viewport:vp}).promise;
+      const jpg=await new Promise(r=>c.toBlob(r,'image/jpeg',0.6));
+      const img=await out.embedJpg(await jpg.arrayBuffer());
+      const pg=out.addPage([vp1.width,vp1.height]);pg.drawImage(img,{x:0,y:0,width:vp1.width,height:vp1.height});
+    }
+    const bytes=await out.save();const blob=new Blob([bytes],{type:'application/pdf'});
+    if(blob.size<file.size) return {blob,name:file.name,mime:'application/pdf'};
+  }catch(e){console.warn('PDF sin comprimir',e)}
+  return {blob:file,name:file.name,mime:'application/pdf'};
+}
+async function processFile(file,onProgress){
+  const isPdf=file.type==='application/pdf'||/\.pdf$/i.test(file.name);
+  const isImg=(file.type||'').startsWith('image/');
+  if(!isPdf&&!isImg) throw new Error('Solo se permiten fotos o PDF');
+  if(file.size>FILE_MAX&&isPdf) throw new Error('El PDF pesa más de 20 MB');
+  const r=isPdf?await compressPdf(file,onProgress):await compressImage(file);
+  if(r.blob.size>FILE_MAX) throw new Error('El archivo sigue pesando más de 20 MB');
+  return r;
+}
+
+/* ================= STATE ================= */
+const S={session:null,me:null,projects:null,rfpCache:{},view:'home',tab:'mias',q:'',draft:null,channel:null,detail:null};
+
+/* ================= AUTH ================= */
+async function boot(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(session){S.session=session;if(await loadMe())return showApp()}
+  showLogin();
+}
+async function loadMe(){
+  const email=(S.session.user.email||'').toLowerCase();
+  const {data,error}=await sb.from('usuario_app').select('*').eq('email',email).maybeSingle();
+  if(error||!data||!data.activo){await sb.auth.signOut();S.session=null;$('#l-err').textContent='Tu usuario no tiene acceso a Requisiciones. Pide acceso a Compras.';$('#l-err').classList.remove('hidden');return false}
+  S.me=data;return true;
+}
+function showLogin(){$('#v-app').classList.add('hidden');$('#v-login').classList.remove('hidden')}
+function showApp(){$('#v-login').classList.add('hidden');$('#v-app').classList.remove('hidden');route()}
+$('#f-login').addEventListener('submit',async e=>{
+  e.preventDefault();const btn=$('#l-btn');btn.disabled=true;btn.innerHTML='<div class="spin"></div>';$('#l-err').classList.add('hidden');
+  const {data,error}=await sb.auth.signInWithPassword({email:$('#l-email').value.trim(),password:$('#l-pass').value});
+  btn.disabled=false;btn.textContent='Entrar';
+  if(error){$('#l-err').textContent=error.message.includes('Invalid')?'Correo o contraseña incorrectos':error.message;$('#l-err').classList.remove('hidden');return}
+  S.session=data.session;if(await loadMe())showApp();
+});
+$('#h-menu').onclick=()=>{
+  sheet(`<h3>${esc(S.me.nombre||S.me.email)}</h3><p class="mut small" style="margin-top:-6px">${esc(S.me.email)}</p>
+  <button class="btn ghost block" id="m-ref" style="margin-bottom:10px">↻ Actualizar</button>
+  <button class="btn danger block" id="m-out">Cerrar sesión</button>`,o=>{
+    o.querySelector('#m-ref').onclick=()=>{closeSheet();location.reload()};
+    o.querySelector('#m-out').onclick=async()=>{await sb.auth.signOut();location.hash='';location.reload()};
+  });
+};
+
+/* ================= ROUTER ================= */
+window.addEventListener('hashchange',route);
+$('#h-back').onclick=()=>history.length>1?history.back():(location.hash='');
+function route(){
+  if(!S.me)return;
+  const h=location.hash.slice(1);unsub();
+  if(h.startsWith('req/'))return viewDetail(h.slice(4));
+  if(h==='nueva')return viewNueva();
+  return viewHome();
+}
+function setHeader(title,back){$('#h-title').textContent=title;$('#h-back').classList.toggle('hidden',!back)}
+function setBar(html){const b=$('#bar');if(!html){b.classList.add('hidden');b.innerHTML='';return}b.innerHTML=html;b.classList.remove('hidden')}
+function unsub(){if(S.channel){sb.removeChannel(S.channel);S.channel=null}}
+
+/* ================= SHEET ================= */
+function sheet(html,onMount){
+  closeSheet();const o=document.createElement('div');o.className='overlay';o.id='ov';
+  o.innerHTML=`<div class="sheet"><div class="grab"></div>${html}</div>`;
+  o.addEventListener('click',e=>{if(e.target===o)closeSheet()});document.body.appendChild(o);onMount&&onMount(o);return o;
+}
+function closeSheet(){const o=$('#ov');o&&o.remove()}
+
+/* ================= DATA ================= */
+async function getProjects(){
+  if(S.projects)return S.projects;
+  const {data,error}=await sb.from('project').select('project_uuid,project_id,project_name,project_address,project_city_state,status,resident_id,supervisor_id,client:client_id(client_name)').neq('status','Terminado').order('project_name');
+  if(error)throw error;S.projects=data;return data;
+}
+async function getRfps(project_uuid){
+  const {data,error}=await sb.from('rfp').select('rfp_uuid,rfp_number,titulo,rfp_kind,project_uuid').eq('project_uuid',project_uuid).eq('status','Aprobada').order('rfp_number',{ascending:false});
+  if(error)throw error;data.forEach(r=>S.rfpCache[r.rfp_uuid]=r);return data;
+}
+const isMine=p=>S.me.resident_id&&(p.resident_id===S.me.resident_id||p.supervisor_id===S.me.resident_id);
+const projAddr=p=>p?[p.project_address,p.project_city_state].filter(Boolean).join(', '):'';
+const projById=id=>(S.projects||[]).find(p=>p.project_uuid===id);
+
+/* ================= HOME ================= */
+async function viewHome(){
+  setHeader('Requisiciones',false);
+  setBar('');
+  const m=$('#main');
+  m.innerHTML=`<div class="tabs"><button data-t="mias" class="${S.tab==='mias'?'on':''}">Mis requisiciones</button><button data-t="obras" class="${S.tab==='obras'?'on':''}">De mis obras</button></div>
+  <div class="search" style="margin-bottom:12px"><input class="i" id="q" placeholder="Buscar folio, obra, partida…" value="${esc(S.q)}"></div>
+  <div class="row between" style="margin:0 2px 8px"><span class="live">En vivo</span><span class="mut small" id="cnt"></span></div>
+  <div id="lst"><div class="center"><div class="spin d"></div></div></div>
+  <button class="btn fab" id="b-new">＋ Nueva requisición</button>`;
+  m.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;viewHome()});
+  $('#q').oninput=debounce(e=>{S.q=e.target.value;renderList()},250);
+  $('#b-new').onclick=()=>location.hash='nueva';
+  await loadList();
+  S.channel=sb.channel('home').on('postgres_changes',{event:'*',schema:'ops',table:'requisicion'},debounce(loadList,600)).subscribe();
+}
+let LIST=[];
+async function loadList(){
+  try{
+    let q=sb.from('v_requisicion').select('req_uuid,folio,project_id,project_name,client_name,solicitante_nombre,solicitante_email,estatus,pct_oc,pct_pagado,total_items,n_pendiente,n_en_compra,n_en_pago,n_pagado,proxima_fecha,rfps,created_at').order('created_at',{ascending:false}).limit(200);
+    if(S.tab==='mias') q=q.eq('solicitante_email',S.me.email);
+    else{
+      const ps=(await getProjects()).filter(isMine).map(p=>p.project_uuid);
+      if(!ps.length){LIST=[];return renderList('No tienes obras asignadas como residente o supervisor.')}
+      q=q.in('project_uuid',ps).neq('solicitante_email',S.me.email);
+    }
+    const {data,error}=await q;if(error)throw error;LIST=data;renderList();
+  }catch(e){$('#lst').innerHTML=`<div class="empty">No se pudo cargar: ${esc(e.message)}</div>`}
+}
+function renderList(emptyMsg){
+  const el=$('#lst');if(!el)return;
+  const q=S.q.trim().toLowerCase();
+  const rows=LIST.filter(r=>!q||[r.folio,r.project_id,r.project_name,r.client_name,r.rfps,r.solicitante_nombre].join(' ').toLowerCase().includes(q));
+  $('#cnt').textContent=rows.length?rows.length+' requisiciones':'';
+  if(!rows.length){el.innerHTML=`<div class="empty">${esc(emptyMsg||(S.tab==='mias'?'Aún no has hecho requisiciones.\nToca “Nueva requisición”.':'No hay requisiciones de otros en tus obras.'))}</div>`;return}
+  el.innerHTML=rows.map(r=>`<a class="list-item" href="#req/${r.req_uuid}">
+    <div class="row between"><span class="mono" style="font-weight:500">${esc(r.folio)}</span>${chip(r.estatus)}</div>
+    <div style="font-weight:600;margin-top:6px">${esc(r.project_id?r.project_id+' · ':'')}${esc(r.project_name)}</div>
+    <div class="mut small">${esc(r.client_name||'')}${S.tab==='obras'?' · Pidió '+esc(r.solicitante_nombre||r.solicitante_email):''}</div>
+    <div class="row between small mut" style="margin-top:6px"><span>${r.total_items} partida${r.total_items==1?'':'s'} · ${fDate(r.created_at)}</span><span>${r.pct_oc>=100?'✅ 100% con OC':Math.round(r.pct_oc)+'% con OC'}</span></div>
+    <div class="prog"><div style="width:${Math.min(100,r.pct_oc)}%"></div></div>
+  </a>`).join('');
+}
+
+/* ================= NUEVA ================= */
+const DKEY=()=>'ghc-req-draft-'+S.me.email;
+function newDraft(){return{client_ref:uid(),step:1,project_uuid:null,split:[],fecha_default:'',entrega_default:{tipo:'obra'},items:[newItem()],notas:'',files:[]}}
+function newItem(base){return{id:uid(),descripcion:'',cantidad:'',unidad:'Pza',especificacion:'',notas:'',fecha_requerida:base?.fecha_requerida||'',entrega:base?.entrega?{...base.entrega}:null,split:[],showMore:false}}
+function saveDraft(){if(S.draft)localStorage.setItem(DKEY(),JSON.stringify(S.draft))}
+async function clearDraft(){if(S.draft)for(const f of S.draft.files)await IDB.del(f.id);localStorage.removeItem(DKEY());S.draft=null}
+
+async function viewNueva(){
+  setHeader('Nueva requisición',true);
+  if(!S.draft){
+    const raw=localStorage.getItem(DKEY());
+    if(raw){
+      let d;try{d=JSON.parse(raw)}catch(e){}
+      if(d&&d.items){
+        S.draft=d;
+        sheet(`<h3>Tienes un borrador sin enviar</h3><p class="mut">Del ${esc(projById(d.project_uuid)?.project_name||'proyecto sin elegir')} · ${d.items.length} partida(s).</p>
+          <button class="btn block" id="d-go" style="margin-bottom:10px">Continuar borrador</button><button class="btn ghost block" id="d-new">Empezar de cero</button>`,o=>{
+          o.querySelector('#d-go').onclick=()=>{closeSheet();renderStep()};
+          o.querySelector('#d-new').onclick=async()=>{closeSheet();await clearDraft();S.draft=newDraft();saveDraft();renderStep()};
+        });
+      }
+    }
+    if(!S.draft){S.draft=newDraft();saveDraft()}
+  }
+  try{await getProjects()}catch(e){toast('No se pudieron cargar las obras',true)}
+  renderStep();
+}
+function stepsBar(n){return`<div class="steps">${[1,2,3,4].map(i=>`<div class="${i<=n?'on':''}"></div>`).join('')}</div>`}
+
+function renderStep(){
+  const d=S.draft;if(!d)return;saveDraft();
+  window.scrollTo(0,0);
+  ({1:step1,2:step2,3:step3,4:step4})[d.step]();
+}
+
+/* --- Paso 1: obra --- */
+let OBRA_TAB='mis';
+function step1(){
+  const d=S.draft,m=$('#main');
+  const mine=(S.projects||[]).filter(isMine);
+  if(!mine.length&&OBRA_TAB==='mis')OBRA_TAB='todas';
+  m.innerHTML=`${stepsBar(1)}<p class="step-h">¿Para qué obra?</p><p class="mut small" style="margin:0 0 12px">Paso 1 de 4</p>
+  <div class="tabs"><button data-t="mis" class="${OBRA_TAB==='mis'?'on':''}">Mis obras (${mine.length})</button><button data-t="todas" class="${OBRA_TAB==='todas'?'on':''}">Todas</button></div>
+  <div class="search" style="margin-bottom:10px"><input class="i" id="qo" placeholder="Buscar obra, clave o cliente"></div><div id="ol"></div>`;
+  m.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{OBRA_TAB=b.dataset.t;step1()});
+  const draw=()=>{
+    const q=$('#qo').value.trim().toLowerCase();
+    const src=OBRA_TAB==='mis'?mine:(S.projects||[]);
+    const rows=src.filter(p=>!q||[p.project_id,p.project_name,p.client?.client_name,p.project_city_state].join(' ').toLowerCase().includes(q)).slice(0,120);
+    $('#ol').innerHTML=rows.length?rows.map(p=>`<div class="pick radio ${d.project_uuid===p.project_uuid?'on':''}" data-id="${p.project_uuid}"><div class="ck">✓</div><div class="grow">
+      <div style="font-weight:600">${esc(p.project_id?p.project_id+' · ':'')}${esc(p.project_name)}</div>
+      <div class="mut small">${esc(p.client?.client_name||'')}${p.project_city_state?' · '+esc(p.project_city_state):''}</div></div></div>`).join(''):'<div class="empty">Sin resultados</div>';
+    $('#ol').querySelectorAll('.pick').forEach(el=>el.onclick=()=>{
+      if(d.project_uuid!==el.dataset.id){d.project_uuid=el.dataset.id;d.split=[]}
+      d.step=2;renderStep();
+    });
+  };
+  $('#qo').oninput=debounce(draw,150);draw();
+  setBar(d.project_uuid?`<button class="btn" id="n1">Siguiente →</button>`:'');
+  if(d.project_uuid)$('#n1').onclick=()=>{d.step=2;renderStep()};
+}
+
+/* --- Paso 2: RFP y split --- */
+function rebalance(split){
+  if(!split.length)return;const n=split.length,base=Math.floor(10000/n)/100;
+  split.forEach((s,i)=>s.pct=i===n-1?+(100-base*(n-1)).toFixed(2):base);
+}
+const sumPct=sp=>+sp.reduce((a,s)=>a+Number(s.pct||0),0).toFixed(2);
+const rfpLabel=id=>{const r=S.rfpCache[id];return r?`${r.rfp_number||'(sin número)'}${r.titulo?' · '+r.titulo:''}`:'RFP'};
+async function step2(){
+  const d=S.draft,m=$('#main'),p=projById(d.project_uuid);
+  m.innerHTML=`${stepsBar(2)}<p class="step-h">¿A qué RFP se carga?</p><p class="mut small" style="margin:0 0 12px">Paso 2 de 4 · ${esc(p?.project_name||'')}</p>
+   <div id="rl"><div class="center"><div class="spin d"></div></div></div>
+   <button class="btn ghost block sm" id="otra" style="margin-top:4px">＋ Agregar RFP de otra obra</button>
+   <div id="sp"></div>`;
+  let rfps=[];
+  try{rfps=await getRfps(d.project_uuid)}catch(e){toast('Error al cargar RFP',true)}
+  // asegura que RFP de otras obras ya elegidas estén en caché
+  const missing=d.split.filter(s=>!S.rfpCache[s.rfp_uuid]).map(s=>s.rfp_uuid);
+  if(missing.length){const {data}=await sb.from('rfp').select('rfp_uuid,rfp_number,titulo,rfp_kind,project_uuid').in('rfp_uuid',missing);(data||[]).forEach(r=>S.rfpCache[r.rfp_uuid]=r)}
+  const drawRfps=()=>{
+    $('#rl').innerHTML=rfps.length?rfps.map(r=>{const on=d.split.some(s=>s.rfp_uuid===r.rfp_uuid);return`<div class="pick ${on?'on':''}" data-id="${r.rfp_uuid}"><div class="ck">✓</div><div class="grow">
+      <div class="mono" style="font-weight:500">${esc(r.rfp_number||'(sin número)')}</div><div class="small">${esc(r.titulo||'')}</div></div></div>`}).join('')
+      :'<div class="warn">Esta obra no tiene RFP aprobadas. Puedes agregar una de otra obra o pedir que aprueben la RFP.</div>';
+    $('#rl').querySelectorAll('.pick').forEach(el=>el.onclick=()=>{
+      const i=d.split.findIndex(s=>s.rfp_uuid===el.dataset.id);
+      if(i>=0)d.split.splice(i,1);else d.split.push({rfp_uuid:el.dataset.id,pct:0});
+      rebalance(d.split);saveDraft();drawRfps();drawSplit();
+    });
+  };
+  const drawSplit=()=>{
+    const el=$('#sp');if(!d.split.length){el.innerHTML='';setBar('<button class="btn ghost" id="b1">← Atrás</button>');$('#b1').onclick=()=>{d.step=1;renderStep()};return}
+    const sum=sumPct(d.split);
+    el.innerHTML=`<p class="sec-title">Reparto (split)</p><div class="card">${d.split.map((s,i)=>{const r=S.rfpCache[s.rfp_uuid];const other=r&&r.project_uuid!==d.project_uuid;return`<div class="row" style="margin-bottom:8px">
+      <div class="grow"><div class="mono small" style="font-weight:500">${esc(r?.rfp_number||'RFP')}</div><div class="mut small">${other?'Otra obra: '+esc(projById(r.project_uuid)?.project_name||''):esc(r?.titulo||'')}</div></div>
+      <input class="i pctin" inputmode="decimal" data-i="${i}" value="${s.pct}"><span>%</span>${other?`<button class="btn danger sm" data-del="${i}">✕</button>`:''}</div>`}).join('')}
+      <div class="row between" style="border-top:1px solid var(--bdr);padding-top:8px"><button class="btn ghost sm" id="eq">Repartir igual</button><span class="${Math.abs(sum-100)<0.01?'sum-ok':'sum-bad'}">Suma: ${sum}%</span></div></div>
+      <p class="mut small">Este reparto aplica a todas las partidas. En el siguiente paso puedes darle un split especial a una partida.</p>`;
+    el.querySelectorAll('.pctin').forEach(inp=>inp.oninput=()=>{d.split[inp.dataset.i].pct=Number(inp.value.replace(',','.'))||0;saveDraft();const s=sumPct(d.split);const sp=el.querySelector('.sum-ok,.sum-bad');sp.className=Math.abs(s-100)<0.01?'sum-ok':'sum-bad';sp.textContent='Suma: '+s+'%';updBar()});
+    el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{d.split.splice(+b.dataset.del,1);rebalance(d.split);saveDraft();drawSplit()});
+    $('#eq').onclick=()=>{rebalance(d.split);saveDraft();drawSplit()};
+    updBar();
+  };
+  const updBar=()=>{
+    const ok=d.split.length&&Math.abs(sumPct(d.split)-100)<0.01;
+    setBar(`<button class="btn ghost" id="b1">← Atrás</button><button class="btn" id="n2" ${ok?'':'disabled'}>Siguiente →</button>`);
+    $('#b1').onclick=()=>{d.step=1;renderStep()};$('#n2').onclick=()=>{d.step=3;renderStep()};
+  };
+  $('#otra').onclick=()=>pickOtherRfp(()=>{drawRfps();drawSplit()});
+  drawRfps();drawSplit();
+}
+function pickOtherRfp(done){
+  const d=S.draft;
+  const o=sheet(`<h3>RFP de otra obra</h3><div class="search" style="margin-bottom:10px"><input class="i" id="qq" placeholder="Buscar obra"></div><div id="pp" style="max-height:60vh;overflow:auto"></div>`,o=>{
+    const pp=o.querySelector('#pp');
+    const drawP=()=>{const q=o.querySelector('#qq').value.trim().toLowerCase();
+      pp.innerHTML=(S.projects||[]).filter(p=>p.project_uuid!==d.project_uuid&&(!q||[p.project_id,p.project_name,p.client?.client_name].join(' ').toLowerCase().includes(q))).slice(0,60)
+        .map(p=>`<div class="pick radio" data-id="${p.project_uuid}"><div class="ck"></div><div class="grow"><div style="font-weight:600">${esc(p.project_id?p.project_id+' · ':'')}${esc(p.project_name)}</div><div class="mut small">${esc(p.client?.client_name||'')}</div></div></div>`).join('');
+      pp.querySelectorAll('.pick').forEach(el=>el.onclick=async()=>{
+        pp.innerHTML='<div class="center"><div class="spin d"></div></div>';
+        const rs=await getRfps(el.dataset.id);
+        pp.innerHTML=rs.length?rs.map(r=>`<div class="pick" data-r="${r.rfp_uuid}"><div class="ck">✓</div><div class="grow"><div class="mono">${esc(r.rfp_number||'')}</div><div class="small">${esc(r.titulo||'')}</div></div></div>`).join(''):'<div class="empty">Esa obra no tiene RFP aprobadas</div>';
+        pp.querySelectorAll('[data-r]').forEach(x=>x.onclick=()=>{if(!d.split.some(s=>s.rfp_uuid===x.dataset.r)){d.split.push({rfp_uuid:x.dataset.r,pct:0});rebalance(d.split);saveDraft()}closeSheet();done()});
+      });};
+    o.querySelector('#qq').oninput=debounce(drawP,150);drawP();
+  });
+}
+
+/* --- Paso 3: partidas --- */
+function entregaOf(it){return it.entrega||S.draft.entrega_default||{tipo:'obra'}}
+function entregaText(e){
+  const p=projById(S.draft.project_uuid);
+  if(!e||e.tipo==='obra')return`<b>${ENTREGA_ICO.obra} Obra</b><span class="mut small"> · ${esc(projAddr(p)||'dirección del proyecto')}</span>`;
+  return`<b>${ENTREGA_ICO[e.tipo]} ${e.tipo==='recoger'?'Recoger':'Otra dirección'}</b><span class="mut small"> · ${esc(e.direccion||'sin dirección')}</span>`;
+}
+function step3(){
+  const d=S.draft,m=$('#main');
+  m.innerHTML=`${stepsBar(3)}<p class="step-h">¿Qué necesitas?</p><p class="mut small" style="margin:0 0 12px">Paso 3 de 4 · una tarjeta por partida</p>
+  <div class="card"><div class="grid2">
+    <div><label class="f" style="margin-top:0">Fecha requerida (todas)</label><input class="i" type="date" id="fdef" min="${todayISO()}" value="${esc(d.fecha_default)}"></div>
+    <div><label class="f" style="margin-top:0">Entrega (todas)</label><button class="entrega" id="edef" style="margin-top:0;min-height:48px">${ENTREGA_ICO[d.entrega_default.tipo]} <span class="small">${d.entrega_default.tipo==='obra'?'Obra':d.entrega_default.tipo==='recoger'?'Recoger':'Otra dir.'}</span></button></div>
+  </div><p class="mut small" style="margin:8px 0 0">Las partidas nuevas toman estos valores. Puedes cambiar cada una.</p></div>
+  <datalist id="dl-u">${UNIDADES.map(u=>`<option value="${u}">`).join('')}</datalist>
+  <div id="items"></div>
+  <button class="btn sec block" id="add">＋ Agregar partida</button>`;
+  $('#fdef').onchange=e=>{const old=d.fecha_default;d.fecha_default=e.target.value;d.items.forEach(it=>{if(!it.fecha_requerida||it.fecha_requerida===old)it.fecha_requerida=d.fecha_default});saveDraft();drawItems()};
+  $('#edef').onclick=()=>editEntrega(d.entrega_default,true,e=>{d.entrega_default=e;d.items.forEach(it=>it.entrega=null);saveDraft();step3()});
+  $('#add').onclick=()=>{const last=d.items[d.items.length-1];d.items.push(newItem({fecha_requerida:d.fecha_default||last?.fecha_requerida,entrega:last?.entrega}));saveDraft();drawItems();setTimeout(()=>{const els=document.querySelectorAll('.item');els[els.length-1]?.scrollIntoView({behavior:'smooth',block:'start'});els[els.length-1]?.querySelector('textarea')?.focus()},50)};
+  drawItems();
+  setBar(`<button class="btn ghost" id="b2">← Atrás</button><button class="btn" id="n3">Revisar →</button>`);
+  $('#b2').onclick=()=>{d.step=2;renderStep()};
+  $('#n3').onclick=()=>{
+    const bad=d.items.findIndex(it=>!it.descripcion.trim()||!(Number(String(it.cantidad).replace(',','.'))>0));
+    if(bad>=0){toast(`Partida ${bad+1}: falta descripción o cantidad`,true);document.querySelectorAll('.item')[bad]?.scrollIntoView({behavior:'smooth'});return}
+    const badSp=d.items.findIndex(it=>it.split.length&&Math.abs(sumPct(it.split)-100)>0.01);
+    if(badSp>=0){toast(`Partida ${badSp+1}: el split especial no suma 100%`,true);return}
+    d.step=4;renderStep();
+  };
+}
+function drawItems(){
+  const d=S.draft,box=$('#items');
+  box.innerHTML=d.items.map((it,i)=>{
+    const files=d.files.filter(f=>f.item===it.id);
+    return`<div class="item" data-id="${it.id}">
+    <div class="row between"><span class="n">Partida ${i+1}</span><div class="row" style="gap:4px">
+      <button class="btn ghost sm" data-a="dup" title="Duplicar">⧉</button>${d.items.length>1?`<button class="btn ghost sm" data-a="del" title="Eliminar" style="color:var(--red)">🗑</button>`:''}</div></div>
+    <label class="f">Descripción *</label><textarea class="i" data-k="descripcion" rows="2" placeholder="Ej. Cemento gris CPC 30R 50 kg">${esc(it.descripcion)}</textarea>
+    <div class="grid2"><div><label class="f">Cantidad *</label><input class="i" data-k="cantidad" inputmode="decimal" value="${esc(it.cantidad)}" placeholder="0"></div>
+      <div><label class="f">Unidad</label><input class="i" data-k="unidad" list="dl-u" value="${esc(it.unidad)}"></div></div>
+    <label class="f">Fecha requerida</label><input class="i" type="date" data-k="fecha_requerida" min="${todayISO()}" value="${esc(it.fecha_requerida)}">
+    <button class="entrega" data-a="ent">${entregaText(entregaOf(it))}<span style="margin-left:auto" class="mut">›</span></button>
+    ${it.showMore||it.especificacion||it.notas?`<label class="f">Marca / especificación</label><input class="i" data-k="especificacion" value="${esc(it.especificacion)}" placeholder="Opcional">
+      <label class="f">Notas de la partida</label><textarea class="i" data-k="notas" rows="2" placeholder="Opcional">${esc(it.notas)}</textarea>`:''}
+    ${it.split.length?`<div class="warn" style="margin-top:10px"><b>Split especial:</b> ${it.split.map(s=>esc(S.rfpCache[s.rfp_uuid]?.rfp_number||'RFP')+' '+s.pct+'%').join(' · ')}</div>`:''}
+    <div class="thumbs">${files.map(thumbHtml).join('')}</div>
+    <div class="minirow">
+      <button class="btn sec sm" data-a="cam">📷 Foto</button><button class="btn sec sm" data-a="file">📎 Archivo</button>
+      ${!(it.showMore||it.especificacion||it.notas)?`<button class="btn ghost sm" data-a="more">＋ Marca / notas</button>`:''}
+      <button class="btn ghost sm" data-a="split">${it.split.length?'Editar split':'Split especial'}</button>
+    </div></div>`}).join('');
+  box.querySelectorAll('.item').forEach(card=>{
+    const it=d.items.find(x=>x.id===card.dataset.id);
+    card.querySelectorAll('[data-k]').forEach(inp=>{const ev=inp.type==='date'?'change':'input';inp.addEventListener(ev,()=>{it[inp.dataset.k]=inp.value;saveDraft()})});
+    card.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
+      const a=b.dataset.a;
+      if(a==='del'){if(confirmInline(b)){d.items=d.items.filter(x=>x!==it);d.files.filter(f=>f.item===it.id).forEach(f=>{IDB.del(f.id)});d.files=d.files.filter(f=>f.item!==it.id);saveDraft();drawItems()}}
+      if(a==='dup'){const c={...it,id:uid(),split:it.split.map(s=>({...s})),entrega:it.entrega?{...it.entrega}:null};d.items.splice(d.items.indexOf(it)+1,0,c);saveDraft();drawItems()}
+      if(a==='ent')editEntrega(entregaOf(it),false,e=>{it.entrega=e;saveDraft();drawItems()},()=>{it.entrega=null;saveDraft();drawItems()});
+      if(a==='more'){it.showMore=true;drawItems()}
+      if(a==='split')editItemSplit(it);
+      if(a==='cam')pickFiles(it.id,true);
+      if(a==='file')pickFiles(it.id,false);
+    });
+    bindThumbs(card);
+  });
+  hydrateThumbs();
+}
+function confirmInline(b){if(b.dataset.c){return true}b.dataset.c='1';b.textContent='¿Eliminar?';b.style.background='var(--red-bg)';setTimeout(()=>{if(b.isConnected){delete b.dataset.c;b.textContent='🗑';b.style.background=''}},2500);return false}
+
+function editEntrega(cur,isDefault,onSave,onReset){
+  const p=projById(S.draft.project_uuid);const e={tipo:'obra',...cur};
+  sheet(`<h3>Lugar de entrega${isDefault?' (todas las partidas)':''}</h3>
+    ${['obra','otra_direccion','recoger'].map(t=>`<div class="pick radio ${e.tipo===t?'on':''}" data-t="${t}"><div class="ck"></div><div class="grow"><div style="font-weight:600">${ENTREGA_ICO[t]} ${ENTREGA_LBL[t]}</div>${t==='obra'?`<div class="mut small">${esc(projAddr(p)||'Dirección del proyecto')}</div>`:''}</div></div>`).join('')}
+    <div id="ef"></div>
+    <div class="row" style="margin-top:14px">${onReset&&!isDefault?'<button class="btn ghost" id="er">Usar el general</button>':''}<button class="btn grow" id="es">Guardar</button></div>`,o=>{
+    const ef=o.querySelector('#ef');
+    const drawF=()=>{ef.innerHTML=e.tipo==='obra'?'':`
+      <label class="f">${e.tipo==='recoger'?'¿Dónde se recoge? (sucursal, bodega, dirección)':'Dirección de entrega'} *</label><textarea class="i" id="e-dir" rows="2">${esc(e.direccion||'')}</textarea>
+      <div class="grid2"><div><label class="f">${e.tipo==='recoger'?'Quién recoge':'Quién recibe'}</label><input class="i" id="e-con" value="${esc(e.contacto||'')}"></div>
+      <div><label class="f">Teléfono</label><input class="i" id="e-tel" inputmode="tel" value="${esc(e.telefono||'')}"></div></div>
+      <label class="f">${e.tipo==='recoger'?'Horario / referencia':'Referencias'}</label><input class="i" id="e-not" value="${esc(e.notas||'')}">`};
+    o.querySelectorAll('[data-t]').forEach(x=>x.onclick=()=>{e.tipo=x.dataset.t;o.querySelectorAll('[data-t]').forEach(y=>y.classList.toggle('on',y===x));drawF()});
+    drawF();
+    o.querySelector('#es').onclick=()=>{
+      if(e.tipo!=='obra'){e.direccion=o.querySelector('#e-dir').value.trim();e.contacto=o.querySelector('#e-con').value.trim();e.telefono=o.querySelector('#e-tel').value.trim();e.notas=o.querySelector('#e-not').value.trim();
+        if(!e.direccion){toast('Escribe la dirección',true);return}}
+      else{delete e.direccion;delete e.contacto;delete e.telefono;delete e.notas}
+      closeSheet();onSave({...e});
+    };
+    const r=o.querySelector('#er');if(r)r.onclick=()=>{closeSheet();onReset()};
+  });
+}
+function editItemSplit(it){
+  const d=S.draft;const sp=it.split.length?it.split.map(s=>({...s})):d.split.map(s=>({...s}));
+  const draw=o=>{const sum=sumPct(sp);o.querySelector('#isp').innerHTML=d.split.map(g=>{const s=sp.find(x=>x.rfp_uuid===g.rfp_uuid);return`<div class="row" style="margin-bottom:8px"><div class="grow"><div class="mono small">${esc(S.rfpCache[g.rfp_uuid]?.rfp_number||'RFP')}</div><div class="mut small">${esc(S.rfpCache[g.rfp_uuid]?.titulo||'')}</div></div><input class="i pctin" inputmode="decimal" data-r="${g.rfp_uuid}" value="${s?s.pct:0}"><span>%</span></div>`}).join('')+`<div class="${Math.abs(sum-100)<0.01?'sum-ok':'sum-bad'}" style="text-align:right">Suma: ${sum}%</div>`;
+    o.querySelectorAll('[data-r]').forEach(inp=>inp.onchange=()=>{const v=Number(inp.value.replace(',','.'))||0;const i=sp.findIndex(x=>x.rfp_uuid===inp.dataset.r);if(i>=0)sp[i].pct=v;else sp.push({rfp_uuid:inp.dataset.r,pct:v});draw(o)})};
+  sheet(`<h3>Split especial de esta partida</h3><p class="mut small" style="margin-top:-6px">Pon 0% en las RFP que no apliquen. Para usar otras RFP, agrégalas primero en el paso 2.</p><div id="isp"></div>
+    <div class="row" style="margin-top:12px">${it.split.length?'<button class="btn danger" id="sx">Quitar split</button>':''}<button class="btn grow" id="ss">Guardar</button></div>`,o=>{
+    draw(o);
+    o.querySelector('#ss').onclick=()=>{const clean=sp.filter(s=>s.pct>0);if(Math.abs(sumPct(clean)-100)>0.01){toast('Debe sumar 100%',true);return}it.split=clean;saveDraft();closeSheet();drawItems()};
+    const x=o.querySelector('#sx');if(x)x.onclick=()=>{it.split=[];saveDraft();closeSheet();drawItems()};
+  });
+}
+
+/* --- Archivos --- */
+function thumbHtml(f){return`<div class="thumb" data-f="${f.id}">${f.mime==='application/pdf'?`<div><div class="pdf">📄</div>${esc(fBytes(f.size))}</div>`:''}<button class="x" data-x="${f.id}">✕</button></div>`}
+function bindThumbs(root){root.querySelectorAll('[data-x]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const d=S.draft;await IDB.del(b.dataset.x);d.files=d.files.filter(f=>f.id!==b.dataset.x);saveDraft();b.parentElement.remove()})}
+async function hydrateThumbs(){for(const el of document.querySelectorAll('.thumb[data-f]')){const f=S.draft.files.find(x=>x.id===el.dataset.f);if(f&&f.mime.startsWith('image/')){const b=await IDB.get(f.id);if(b)el.style.backgroundImage=`url(${URL.createObjectURL(b)})`}}}
+function pickFiles(itemId,camera){
+  const inp=document.createElement('input');inp.type='file';
+  inp.accept=camera?'image/*':'image/*,application/pdf';if(camera)inp.capture='environment';else inp.multiple=true;
+  inp.onchange=async()=>{
+    for(const file of inp.files){
+      const t=document.createElement('div');t.className='toast';t.textContent='Procesando '+file.name+'…';document.body.appendChild(t);
+      try{
+        const r=await processFile(file,(p,n)=>t.textContent=`Comprimiendo PDF ${p}/${n}…`);
+        const id=uid();await IDB.put(id,r.blob);
+        S.draft.files.push({id,item:itemId,name:r.name,mime:r.mime,size:r.blob.size,orig:file.size});saveDraft();
+        if(r.blob.size<file.size*0.9)toast(`${fBytes(file.size)} → ${fBytes(r.blob.size)}`);
+      }catch(e){toast(e.message,true)}
+      t.remove();
+    }
+    S.draft.step===3?drawItems():step4();
+  };
+  inp.click();
+}
+
+/* --- Paso 4: resumen y envío --- */
+function step4(){
+  const d=S.draft,m=$('#main'),p=projById(d.project_uuid);
+  const gen=d.files.filter(f=>!f.item);
+  m.innerHTML=`${stepsBar(4)}<p class="step-h">Revisa y envía</p><p class="mut small" style="margin:0 0 12px">Paso 4 de 4</p>
+  <div class="card"><dl class="kv"><dt>Obra</dt><dd><b>${esc(p?.project_id?p.project_id+' · ':'')}${esc(p?.project_name||'')}</b></dd>
+   <dt>RFP</dt><dd>${d.split.map(s=>`<span class="mono small">${esc(S.rfpCache[s.rfp_uuid]?.rfp_number||'RFP')}</span> ${s.pct}%`).join('<br>')}</dd>
+   <dt>Partidas</dt><dd>${d.items.length}</dd></dl></div>
+  <p class="sec-title">Partidas</p>
+  ${d.items.map((it,i)=>{const e=entregaOf(it);const nf=d.files.filter(f=>f.item===it.id).length;return`<div class="card" style="padding:12px">
+    <div class="row between"><span class="n mono small mut">#${i+1}</span><b>${fNum(String(it.cantidad).replace(',','.'))} ${esc(it.unidad)}</b></div>
+    <div style="margin-top:4px">${esc(it.descripcion)}</div>${it.especificacion?`<div class="mut small">${esc(it.especificacion)}</div>`:''}
+    <div class="mut small" style="margin-top:6px">📅 ${fDate(it.fecha_requerida)} · ${ENTREGA_ICO[e.tipo]} ${e.tipo==='obra'?'Obra':esc(e.direccion||'')}${nf?' · 📎 '+nf:''}${it.split.length?' · split especial':''}</div></div>`}).join('')}
+  <p class="sec-title">Notas generales</p>
+  <textarea class="i" id="notas" rows="3" placeholder="Algo que compras deba saber (opcional)">${esc(d.notas)}</textarea>
+  <p class="sec-title">Adjuntos generales (cotización, fotos)</p>
+  <div class="thumbs" style="margin-top:0">${gen.map(thumbHtml).join('')}</div>
+  <div class="minirow"><button class="btn sec sm" id="gcam">📷 Foto</button><button class="btn sec sm" id="gfile">📎 Archivo / PDF</button></div>`;
+  $('#notas').oninput=e=>{d.notas=e.target.value;saveDraft()};
+  $('#gcam').onclick=()=>pickFiles(null,true);$('#gfile').onclick=()=>pickFiles(null,false);
+  bindThumbs(m);hydrateThumbs();
+  setBar(`<button class="btn ghost" id="b3">← Editar</button><button class="btn" id="send">Enviar requisición</button>`);
+  $('#b3').onclick=()=>{d.step=3;renderStep()};
+  $('#send').onclick=submit;
+}
+
+async function submit(){
+  const d=S.draft,btn=$('#send');btn.disabled=true;btn.innerHTML='<div class="spin"></div> Enviando…';
+  try{
+    const items=d.items.map(it=>{const e=entregaOf(it);return{
+      descripcion:it.descripcion.trim(),cantidad:Number(String(it.cantidad).replace(',','.')),unidad:it.unidad,especificacion:it.especificacion,notas:it.notas,
+      fecha_requerida:it.fecha_requerida||d.fecha_default||'',entrega_tipo:e.tipo,entrega_direccion:e.direccion||'',entrega_contacto:e.contacto||'',
+      entrega_telefono:e.telefono||'',entrega_notas:e.notas||'',split:it.split}});
+    const payload={client_ref:d.client_ref,project_uuid:d.project_uuid,solicitante_email:S.me.email,solicitante_nombre:S.me.nombre||S.me.email,
+      resident_id:S.me.resident_id||'',notas:d.notas,fecha_requerida_default:d.fecha_default||'',split:d.split,items};
+    let res=d.result;
+    if(!res){const {data,error}=await sb.rpc('crear_requisicion',{p:payload});if(error)throw error;res=data;d.result=res;saveDraft()}
+    // subir adjuntos
+    const pend=d.files.filter(f=>!f.done);let i=0;
+    for(const f of pend){
+      i++;btn.innerHTML=`<div class="spin"></div> Subiendo archivo ${i}/${pend.length}…`;
+      const blob=await IDB.get(f.id);if(!blob){f.done=true;continue}
+      const partida=f.item?d.items.findIndex(x=>x.id===f.item)+1:0;
+      const item_uuid=partida?res.items.find(x=>x.partida===partida)?.item_uuid:null;
+      const safe=f.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w.\-]+/g,'_').slice(-80);
+      const path=`${res.folio}/${partida?'p'+partida:'general'}/${Date.now()}_${safe}`;
+      const up=await sb.storage.from(BUCKET).upload(path,blob,{contentType:f.mime,upsert:false});
+      if(up.error)throw new Error('No se pudo subir '+f.name+': '+up.error.message);
+      const url=sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+      const ins=await sb.from('requisicion_adjunto').insert({req_uuid:res.req_uuid,item_uuid,path,url,nombre:f.name,mime:f.mime,bytes:f.size,subido_por:S.me.email});
+      if(ins.error)throw ins.error;
+      f.done=true;saveDraft();
+    }
+    const folio=res.folio,req=res.req_uuid;
+    await clearDraft();
+    setBar('');
+    $('#main').innerHTML=`<div class="card" style="text-align:center;padding:30px 18px;margin-top:20px">
+      <div style="font-size:46px">✅</div><h2 style="margin:6px 0">Requisición enviada</h2>
+      <p class="mut" style="margin:0 0 10px">Tu folio es</p><div class="folio-big">${esc(folio)}</div>
+      <p class="mut small" style="margin-top:14px">Compras ya la puede ver. El estatus se actualiza solo.</p>
+      <button class="btn block" style="margin-top:16px" onclick="location.hash='req/${req}'">Ver estatus</button>
+      <button class="btn ghost block" style="margin-top:10px" onclick="location.hash=''">Ir al inicio</button></div>`;
+    history.replaceState(null,'','#enviada');
+  }catch(e){
+    console.error(e);btn.disabled=false;btn.textContent='Reintentar envío';
+    const msg=(e.message||'').includes('Failed to fetch')?'Sin conexión. Tu borrador está guardado; reintenta cuando tengas señal.':e.message;
+    toast(msg,true);
+  }
+}
+
+/* ================= DETALLE ================= */
+async function viewDetail(id){
+  setHeader('Requisición',true);setBar('');
+  const m=$('#main');m.innerHTML='<div class="center"><div class="spin d"></div></div>';
+  await loadDetail(id);
+  const reload=debounce(()=>loadDetail(id),400);
+  S.channel=sb.channel('req-'+id)
+    .on('postgres_changes',{event:'*',schema:'ops',table:'requisicion_item',filter:`req_uuid=eq.${id}`},reload)
+    .on('postgres_changes',{event:'*',schema:'ops',table:'requisicion',filter:`req_uuid=eq.${id}`},reload)
+    .on('postgres_changes',{event:'INSERT',schema:'ops',table:'requisicion_evento',filter:`req_uuid=eq.${id}`},reload)
+    .subscribe();
+}
+async function loadDetail(id){
+  const m=$('#main');
+  const [r,it,sp,ad,ev]=await Promise.all([
+    sb.from('v_requisicion').select('*').eq('req_uuid',id).maybeSingle(),
+    sb.from('requisicion_item').select('*,links:oc_requisicion_item(cantidad,oc:oc_uuid(oc_number,status))').eq('req_uuid',id).order('partida'),
+    sb.from('requisicion_rfp').select('pct,rfp:rfp_uuid(rfp_number,titulo)').eq('req_uuid',id),
+    sb.from('requisicion_adjunto').select('*').eq('req_uuid',id).order('created_at'),
+    sb.from('requisicion_evento').select('*').eq('req_uuid',id).order('created_at',{ascending:false}).limit(100)
+  ]);
+  const ids=(it.data||[]).filter(x=>x.split_especial).map(x=>x.item_uuid);
+  const isp=ids.length?await sb.from('requisicion_item_rfp').select('item_uuid,pct,rfp:rfp_uuid(rfp_number)').in('item_uuid',ids):{data:[]};
+  if(location.hash.slice(1)!=='req/'+id)return;
+  if(r.error||!r.data){m.innerHTML='<div class="empty">No se encontró la requisición.</div>';return}
+  const q=r.data;setHeader(q.folio,true);
+  const items=it.data||[],adj=ad.data||[];
+  const ispl=isp.data||[];
+  const addr=[q.project_address,q.project_city_state].filter(Boolean).join(', ');
+  const adjH=list=>list.length?`<div class="thumbs">${list.map(a=>a.mime&&a.mime.startsWith('image/')?`<a class="thumb" href="${esc(a.url)}" target="_blank" style="background-image:url('${esc(a.url)}')"></a>`:`<a class="thumb" href="${esc(a.url)}" target="_blank"><div><div class="pdf">📄</div>${esc((a.nombre||'').slice(0,14))}</div></a>`).join('')}</div>`:'';
+  m.innerHTML=`<div class="card">
+    <div class="row between"><span class="folio-big" style="font-size:20px">${esc(q.folio)}</span>${chip(q.estatus)}</div>
+    <div style="font-weight:600;margin-top:8px">${esc(q.project_id?q.project_id+' · ':'')}${esc(q.project_name)}</div>
+    <div class="mut small">${esc(q.client_name||'')}</div>
+    <div class="mut small" style="margin-top:6px">Pidió ${esc(q.solicitante_nombre||q.solicitante_email)} · ${fDT(q.created_at)}</div>
+    <div class="row between small" style="margin-top:12px"><span>Con orden de compra</span><b>${q.pct_oc>=100?'✅ 100%':Math.round(q.pct_oc)+'%'}</b></div><div class="prog"><div style="width:${Math.min(100,q.pct_oc)}%"></div></div>
+    <div class="row between small" style="margin-top:10px"><span>Pagado</span><b>${Math.round(q.pct_pagado)}%</b></div><div class="prog g"><div style="width:${Math.min(100,q.pct_pagado)}%"></div></div>
+    <div style="margin-top:10px"><span class="live">Se actualiza en vivo</span></div>
+  </div>
+  <div class="card"><div class="small mut" style="margin-bottom:4px">RFP / split</div>${(sp.data||[]).map(s=>`<div class="row between small"><span class="mono">${esc(s.rfp?.rfp_number||'')}</span><b>${s.pct}%</b></div>`).join('')}
+   ${q.notas?`<div class="small mut" style="margin-top:10px">Notas</div><div class="small" style="white-space:pre-wrap">${esc(q.notas)}</div>`:''}
+   ${adjH(adj.filter(a=>!a.item_uuid))}</div>
+  <p class="sec-title">Partidas (${items.length})</p>
+  ${items.map(x=>{const links=(x.links||[]);const s=ispl.filter(y=>y.item_uuid===x.item_uuid);return`<div class="card" style="padding:12px">
+    <div class="row between"><span class="mono small mut">#${x.partida}</span>${chip(x.estatus)}</div>
+    <div style="margin-top:4px;font-weight:500">${esc(x.descripcion)}</div>
+    ${x.especificacion?`<div class="mut small">${esc(x.especificacion)}</div>`:''}
+    <div class="row between small" style="margin-top:6px"><span><b>${fNum(x.cantidad)}</b> ${esc(x.unidad||'')}</span>${x.cantidad_con_oc>0?`<span class="mut">${fNum(Math.min(x.cantidad_con_oc,x.cantidad))}/${fNum(x.cantidad)} con OC</span>`:''}</div>
+    <div class="mut small" style="margin-top:4px">📅 ${fDate(x.fecha_requerida)} · ${ENTREGA_ICO[x.entrega_tipo]} ${x.entrega_tipo==='obra'?esc(addr||'Obra'):esc(x.entrega_direccion||'')}${x.entrega_contacto?' · '+esc(x.entrega_contacto):''}${x.entrega_telefono?' · '+esc(x.entrega_telefono):''}</div>
+    ${s.length?`<div class="small" style="margin-top:4px">Split: ${s.map(y=>esc(y.rfp?.rfp_number||'')+' '+y.pct+'%').join(' · ')}</div>`:''}
+    ${links.length?`<div class="small" style="margin-top:6px">${links.map(l=>`<span class="chip st-En-pago mono">${esc(l.oc?.oc_number||'OC')} · ${esc(l.oc?.status||'')}</span>`).join(' ')}</div>`:''}
+    ${x.tomado_por&&x.estatus!=='Pendiente'?`<div class="mut small" style="margin-top:4px">La atiende: ${esc(x.tomado_por)}</div>`:''}
+    ${x.cancelado?`<div class="small sum-bad" style="margin-top:4px">Cancelada: ${esc(x.cancelado_motivo||'')}</div>`:''}
+    ${adjH(adj.filter(a=>a.item_uuid===x.item_uuid))}</div>`}).join('')}
+  <button class="btn sec block sm" id="addadj">📎 Agregar foto o archivo</button>
+  <p class="sec-title">Historial</p><div class="card"><div class="tl">${(ev.data||[]).map(e=>`<div class="e"><div class="small">${esc(e.detalle)}</div><div class="mut small">${esc(e.usuario||'')} · ${fDT(e.created_at)}</div></div>`).join('')}</div></div>`;
+  $('#addadj').onclick=()=>addLaterFile(q,items);
+}
+function addLaterFile(q,items){
+  sheet(`<h3>Agregar adjunto</h3><label class="f">¿A qué corresponde?</label><select class="i" id="aa"><option value="">General de la requisición</option>${items.map(x=>`<option value="${x.item_uuid}">#${x.partida} · ${esc(x.descripcion.slice(0,40))}</option>`).join('')}</select>
+   <div class="row" style="margin-top:14px"><button class="btn sec grow" id="ac">📷 Foto</button><button class="btn sec grow" id="af">📎 Archivo</button></div>`,o=>{
+    const go=cam=>{const item_uuid=o.querySelector('#aa').value||null;closeSheet();
+      const inp=document.createElement('input');inp.type='file';inp.accept=cam?'image/*':'image/*,application/pdf';if(cam)inp.capture='environment';else inp.multiple=true;
+      inp.onchange=async()=>{for(const file of inp.files){const t=document.createElement('div');t.className='toast';t.textContent='Subiendo '+file.name+'…';document.body.appendChild(t);
+        try{const r=await processFile(file,(p,n)=>t.textContent=`Comprimiendo PDF ${p}/${n}…`);
+          const partida=item_uuid?items.find(x=>x.item_uuid===item_uuid).partida:0;
+          const safe=r.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w.\-]+/g,'_').slice(-80);
+          const path=`${q.folio}/${partida?'p'+partida:'general'}/${Date.now()}_${safe}`;
+          const up=await sb.storage.from(BUCKET).upload(path,r.blob,{contentType:r.mime});if(up.error)throw up.error;
+          const url=sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+          const ins=await sb.from('requisicion_adjunto').insert({req_uuid:q.req_uuid,item_uuid,path,url,nombre:r.name,mime:r.mime,bytes:r.blob.size,subido_por:S.me.email});if(ins.error)throw ins.error;
+          await sb.from('requisicion_evento').insert({req_uuid:q.req_uuid,item_uuid,tipo:'adjunto',detalle:'Adjunto agregado: '+r.name,usuario:S.me.nombre||S.me.email});
+          toast('Archivo agregado');
+        }catch(e){toast(e.message,true)}t.remove()}
+        loadDetail(q.req_uuid)};
+      inp.click()};
+    o.querySelector('#ac').onclick=()=>go(true);o.querySelector('#af').onclick=()=>go(false);
+  });
+}
+
+sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT'){S.me=null;showLogin()}});
+boot();
+</script>
+</body>
+</html>
