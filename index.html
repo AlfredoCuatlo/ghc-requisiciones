@@ -6,135 +6,194 @@
 <meta name="theme-color" content="#1B4F72">
 <title>Requisiciones · GHC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+/* === VARIABLES BASE (GHC azul) — mismas que Órdenes de Compra === */
 :root{
-  --bg:#F5F4F0;--surface:#FFF;--bdr:#D8D5CC;--txt:#18170E;--mut:#6A6760;
+  --bg:#F5F4F0;--surface:#FFF;--s2:#F0EFE9;--s3:#E5E3DB;
+  --bdr:#D8D5CC;--bdr2:#B8B5AB;
+  --txt:#18170E;--mut:#6A6760;--mut2:#A3A09A;
   --acc:#1B4F72;--acc-lt:#EAF2F8;--acc-dk:#163F5C;
-  --grn:#1A5C38;--grn-lt:#E8F5EE;--amber:#7A4F00;--amber-bg:#FEF3DC;--red:#991B1B;--red-bg:#FEE2E2;
-  --vio:#5B3E8F;--vio-bg:#EFE9F8;
-  --sans:'Sora',system-ui,sans-serif;--mono:'Fira Code',monospace;
-  --r:12px;--safe-b:env(safe-area-inset-bottom,0px);
+  --grn:#1A5C38;--grn-lt:#E8F5EE;
+  --amber:#7A4F00;--amber-bg:#FEF3DC;
+  --red:#991B1B;--red-bg:#FEE2E2;
+  --vio:#3B2FA0;--vio-bg:#EDE9FE;
+  --sans:'Sora',sans-serif;--mono:'Fira Code',monospace;
+  --r:7px;--rl:11px;--safe-b:env(safe-area-inset-bottom,0px);
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15px;line-height:1.4}
-button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:var(--sans);font-size:14px;background:var(--bg);color:var(--txt);line-height:1.4}
+button,input,select,textarea{font-family:var(--sans);font-size:16px;color:var(--txt)}
 .hidden{display:none!important}
 .mono{font-family:var(--mono)}
 .mut{color:var(--mut)}
-.small{font-size:12.5px}
+.small{font-size:12px}
 a{color:var(--acc)}
 
-/* layout */
-header.top{position:sticky;top:0;z-index:20;background:var(--acc);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;min-height:56px}
-header.top h1{font-size:17px;margin:0;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-header.top .iconbtn{background:transparent;border:0;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
-header.top .iconbtn:active{background:rgba(255,255,255,.15)}
-main{padding:14px 14px calc(110px + var(--safe-b));max-width:720px;margin:0 auto}
-.card{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:12px}
-.row{display:flex;gap:10px;align-items:center}
-.between{justify-content:space-between}
-.wrap{flex-wrap:wrap}
-.grow{flex:1;min-width:0}
-.sec-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin:18px 2px 8px}
+/* header estilo lhd */
+.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--bdr);padding:10px 12px;display:flex;align-items:center;gap:10px;min-height:58px}
+.mark{width:34px;height:34px;border-radius:8px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:800;font-size:11px;letter-spacing:.02em;flex:none}
+.top .tt{flex:1;min-width:0}
+.top h1{font-size:15px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top p{font-size:10px;color:var(--mut);font-family:var(--mono);margin-top:1px}
+.ib{background:var(--s2);border:1.5px solid var(--bdr);color:var(--mut);width:40px;height:40px;border-radius:var(--r);display:grid;place-items:center;font-size:18px;flex:none}
+.ib:active{border-color:var(--acc);color:var(--acc)}
+main{padding:12px 12px calc(100px + var(--safe-b));max-width:720px;margin:0 auto}
 
-/* inputs */
-label.f{display:block;font-size:13px;font-weight:500;color:var(--mut);margin:10px 0 4px}
-input.i,select.i,textarea.i{width:100%;border:1px solid var(--bdr);border-radius:10px;padding:12px;background:#fff;min-height:48px}
-textarea.i{min-height:64px;resize:vertical}
-input.i:focus,select.i:focus,textarea.i:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--acc)}
-.search{position:relative}
-.search input{padding-left:40px}
-.search:before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.6}
+/* tarjetas estilo dcard */
+.dcard{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;margin-bottom:11px}
+.dcard-hd{padding:11px 14px;border-bottom:1px solid var(--bdr);background:var(--s2);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.dcard-bd{padding:12px 14px}
+.dnum{font-family:var(--mono);font-size:12px;color:var(--acc);font-weight:600}
+.dtit{font-size:14px;font-weight:700;margin-top:2px}
+.dsub{font-size:11px;color:var(--mut);margin-top:2px}
+.fhd{padding:10px 14px;background:var(--acc);color:#fff;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700}
+.stitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:16px 2px 7px;padding-bottom:5px;border-bottom:1px solid var(--bdr)}
+.lbl{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin:10px 0 4px}
+.amounts{display:grid;grid-template-columns:repeat(3,1fr)}
+.ait{padding:9px 12px;border-right:1px solid var(--bdr)}
+.ait:last-child{border-right:none}
+.albl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.aval{font-size:15px;font-weight:600;font-family:var(--mono);margin-top:2px}
 
-/* buttons */
-.btn{border:0;border-radius:12px;padding:0 18px;min-height:50px;font-weight:600;background:var(--acc);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+/* inputs (igual que OC) */
+input.i,select.i,textarea.i{width:100%;background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r);padding:10px 11px;min-height:46px;outline:none;transition:border-color .15s}
+input.i:focus,select.i:focus,textarea.i:focus{border-color:var(--acc)}
+input[type=date].i{font-family:var(--mono);font-size:15px}
+textarea.i{min-height:60px;resize:vertical}
+.sbox{position:relative}
+.sbox input{background:var(--s2);padding-left:36px}
+.sbox input:focus{background:#fff}
+.sbox svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut)}
+
+/* botones (bsub / bcancel / abtn) */
+.btn{border:none;border-radius:var(--r);padding:0 16px;min-height:48px;font-weight:700;font-size:14px;background:var(--acc);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:7px}
 .btn:active{background:var(--acc-dk)}
-.btn:disabled{opacity:.5}
+.btn:disabled{opacity:.4}
 .btn.sec{background:var(--acc-lt);color:var(--acc)}
-.btn.ghost{background:transparent;color:var(--acc);border:1px solid var(--bdr)}
-.btn.danger{background:var(--red-bg);color:var(--red)}
+.btn.ghost{background:#fff;color:var(--mut);border:1.5px solid var(--bdr)}
+.btn.grn{background:var(--grn)}
+.btn.red{background:#fff;color:var(--red);border:1.5px solid var(--red)}
 .btn.block{width:100%}
-.btn.sm{min-height:40px;padding:0 12px;font-size:14px;border-radius:10px}
-.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--bdr);padding:10px 14px calc(10px + var(--safe-b));display:flex;gap:10px}
+.abtn{border:1.5px solid var(--bdr);background:#fff;color:var(--mut);padding:0 12px;min-height:44px;border-radius:var(--r);font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.abtn:active{border-color:var(--acc);color:var(--acc)}
+.abtn.prim{background:var(--acc);color:#fff;border-color:var(--acc)}
+.abtn.grn{background:var(--grn);color:#fff;border-color:var(--grn)}
+.abtn.red{border-color:var(--red);color:var(--red)}
+.btn-add{width:100%;background:transparent;border:1.5px dashed var(--bdr2);color:var(--mut);min-height:46px;border-radius:var(--r);font-size:13px;font-weight:700}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--bdr);padding:9px 12px calc(9px + var(--safe-b));display:flex;gap:8px}
 .bar .btn{flex:1}
-.fab{position:fixed;right:18px;bottom:calc(22px + var(--safe-b));z-index:30;height:58px;padding:0 22px;border-radius:29px;box-shadow:0 6px 18px rgba(27,79,114,.35)}
+.fab{position:fixed;right:16px;bottom:calc(20px + var(--safe-b));z-index:30;height:54px;padding:0 20px;border-radius:27px;box-shadow:0 6px 18px rgba(27,79,114,.35)}
 
-/* tabs */
-.tabs{display:flex;background:#E9E7E1;border-radius:12px;padding:4px;gap:4px;margin-bottom:12px}
-.tabs button{flex:1;border:0;background:transparent;border-radius:9px;min-height:42px;font-weight:600;font-size:14px;color:var(--mut)}
-.tabs button.on{background:#fff;color:var(--acc);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-
-/* chips */
-.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
-.st-Pendiente{background:#EEEDE8;color:#55534C}
+/* chips y badges (OC) */
+.chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chip{font-size:11px;font-weight:700;padding:6px 11px;border-radius:20px;border:1.5px solid var(--bdr);background:#fff;color:var(--mut);white-space:nowrap}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.bdg{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;display:inline-block}
+.st-Pendiente{background:var(--s3);color:#4A4842}
 .st-En-compra{background:var(--amber-bg);color:var(--amber)}
 .st-En-pago,.st-OC-parcial{background:var(--acc-lt);color:var(--acc)}
 .st-100-con-OC{background:var(--vio-bg);color:var(--vio)}
 .st-Pagado,.st-Pagada{background:var(--grn-lt);color:var(--grn)}
 .st-Cancelado,.st-Cancelada{background:var(--red-bg);color:var(--red)}
-.prog{height:6px;background:#EEEDE8;border-radius:3px;overflow:hidden;margin-top:8px}
-.prog>div{height:100%;background:var(--acc);border-radius:3px}
+.b-urg{background:var(--red);color:#fff}
+.b-rec{background:var(--grn);color:#fff}
+.prog{height:5px;background:var(--s3);border-radius:3px;overflow:hidden;margin-top:6px}
+.prog>div{height:100%;background:var(--acc)}
 .prog.g>div{background:var(--grn)}
+.prog.v>div{background:var(--vio)}
 
-/* list */
-.list-item{display:block;color:inherit;text-decoration:none;background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:13px 14px;margin-bottom:10px;cursor:pointer}
-.list-item:active{background:#FAFAF8}
-.pick{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--surface);margin-bottom:8px;cursor:pointer}
+/* lista estilo ritem */
+.ritem{display:block;background:var(--surface);border:1px solid var(--bdr);border-radius:var(--rl);padding:11px 13px;margin-bottom:8px;color:inherit;text-decoration:none}
+.ritem:active{background:var(--s2)}
+.ri-num{font-family:var(--mono);font-size:11px;color:var(--acc);font-weight:600}
+.ri-tit{font-size:13px;font-weight:600;margin-top:2px}
+.ri-sub{font-size:11px;color:var(--mut);margin-top:1px}
+
+/* selección */
+.pick{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border:1.5px solid var(--bdr);border-radius:var(--rl);background:var(--surface);margin-bottom:7px}
 .pick.on{border-color:var(--acc);background:var(--acc-lt)}
-.pick .ck{width:24px;height:24px;border-radius:7px;border:2px solid var(--bdr);flex:none;display:grid;place-items:center;font-size:15px;color:#fff;margin-top:1px}
+.pick .ck{width:22px;height:22px;border-radius:6px;border:2px solid var(--bdr2);flex:none;display:grid;place-items:center;font-size:13px;color:#fff;margin-top:1px}
 .pick.on .ck{background:var(--acc);border-color:var(--acc)}
 .pick.radio .ck{border-radius:50%}
-
-/* steps */
-.steps{display:flex;gap:6px;margin:2px 0 14px}
-.steps div{flex:1;height:5px;border-radius:3px;background:#E1DED6}
+.tabs{display:flex;background:var(--s3);border-radius:var(--r);padding:3px;gap:3px;margin-bottom:10px}
+.tabs button{flex:1;border:0;background:transparent;border-radius:6px;min-height:38px;font-weight:700;font-size:12px;color:var(--mut)}
+.tabs button.on{background:#fff;color:var(--acc);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.steps{display:flex;gap:5px;margin:0 0 12px}
+.steps div{flex:1;height:4px;border-radius:2px;background:var(--s3)}
 .steps div.on{background:var(--acc)}
-.step-h{font-size:19px;font-weight:700;margin:0 0 2px}
+.step-h{font-size:18px;font-weight:700;letter-spacing:-.02em}
 
-/* item card */
-.item{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px 14px;margin-bottom:12px}
-.item .n{font-family:var(--mono);font-size:12px;background:var(--acc);color:#fff;border-radius:6px;padding:2px 7px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.entrega{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px dashed var(--bdr);background:#FBFAF7;border-radius:10px;padding:10px 12px;min-height:48px;margin-top:10px}
-.entrega b{font-weight:600}
-.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.thumb{text-decoration:none;position:relative;width:68px;height:68px;border-radius:10px;border:1px solid var(--bdr);background:#F0EEE8 center/cover no-repeat;display:grid;place-items:center;font-size:11px;text-align:center;overflow:hidden;color:var(--mut)}
-.thumb .x{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:50%;width:22px;height:22px;font-size:13px;line-height:1}
-.thumb .pdf{font-size:22px}
-.minirow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+/* partidas */
+.item{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--rl);margin-bottom:11px;overflow:visible}
+.item-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--bdr);border-radius:var(--rl) var(--rl) 0 0}
+.item-bd{padding:4px 12px 12px}
+.n{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--acc)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.entrega{display:flex;align-items:center;gap:7px;width:100%;text-align:left;border:1.5px dashed var(--bdr2);background:var(--s2);border-radius:var(--r);padding:9px 11px;min-height:46px;margin-top:10px;font-size:13px}
+.thumbs{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.thumb{position:relative;width:62px;height:62px;border-radius:var(--r);border:1px solid var(--bdr);background:var(--s2) center/cover no-repeat;display:grid;place-items:center;font-size:10px;text-align:center;overflow:hidden;color:var(--mut);text-decoration:none}
+.thumb .x{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:1}
+.thumb .pdf{font-size:20px}
+.minirow{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.ac{position:relative}
+.ac-list{position:absolute;left:0;right:0;top:100%;z-index:15;background:#fff;border:1.5px solid var(--acc);border-top:none;border-radius:0 0 var(--r) var(--r);max-height:240px;overflow:auto;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.ac-list div{padding:9px 11px;border-bottom:1px solid var(--s3);font-size:13px}
+.ac-list div:active{background:var(--acc-lt)}
+.ac-list small{color:var(--mut);font-family:var(--mono);font-size:10px}
 
-/* sheet */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:var(--surface);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:8px 16px calc(16px + var(--safe-b))}
-.sheet .grab{width:42px;height:5px;background:#D5D2C9;border-radius:3px;margin:4px auto 10px}
-.sheet h3{margin:0 0 10px;font-size:17px}
+/* hoja inferior y modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:14px 14px 0 0;padding:6px 14px calc(14px + var(--safe-b))}
+.sheet .grab{width:40px;height:4px;background:var(--bdr);border-radius:2px;margin:4px auto 10px}
+.sheet h3{font-size:15px;font-weight:700;margin-bottom:8px}
 
-/* misc */
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + var(--safe-b));background:#18170E;color:#fff;padding:12px 18px;border-radius:12px;z-index:80;font-size:14px;max-width:92vw;box-shadow:0 6px 20px rgba(0,0,0,.25)}
-.toast.err{background:var(--red)}
-.empty{text-align:center;color:var(--mut);padding:40px 10px}
-.spin{width:22px;height:22px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
-.spin.d{border-color:#DDD;border-top-color:var(--acc)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + var(--safe-b));background:var(--txt);color:#fff;padding:10px 15px;border-radius:8px;z-index:80;font-size:13px;max-width:92vw;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast.err{background:var(--red)}.toast.ok{background:var(--grn)}
+.empty{text-align:center;color:var(--mut);padding:36px 10px;font-size:13px;white-space:pre-line}
+.spin{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+.spin.d{border-color:var(--bdr2);border-top-color:var(--acc)}
 @keyframes sp{to{transform:rotate(360deg)}}
-.center{display:grid;place-items:center;padding:30px}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
-.kv dt{color:var(--mut)}
-.kv dd{margin:0}
-.tl{border-left:2px solid var(--bdr);margin-left:6px;padding-left:14px}
-.tl .e{position:relative;padding:0 0 12px}
-.tl .e:before{content:"";position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--acc)}
-.sum-ok{color:var(--grn);font-weight:600}
-.sum-bad{color:var(--red);font-weight:600}
-.pctin{width:84px!important;text-align:right;min-height:42px!important;padding:8px 10px!important}
-.login-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;max-width:420px;margin:0 auto}
-.logo{width:64px;height:64px;border-radius:16px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:22px;margin-bottom:16px}
-.folio-big{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--acc);letter-spacing:.02em}
-.warn{background:var(--amber-bg);color:var(--amber);border-radius:10px;padding:10px 12px;font-size:13.5px}
-.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--grn)}
-.live:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--grn);animation:pl 1.6s infinite}
+.center{display:grid;place-items:center;padding:28px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
+.kv dt{color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+.tl .e{position:relative;padding:0 0 11px 16px;border-left:2px solid var(--bdr);margin-left:4px}
+.tl .e:before{content:"";position:absolute;left:-6px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--acc)}
+.sum-ok{color:var(--grn);font-weight:700}
+.sum-bad{color:var(--red);font-weight:700}
+.pctin{width:80px!important;text-align:right;min-height:40px!important;padding:7px 9px!important;font-family:var(--mono)}
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;max-width:400px;margin:0 auto}
+.login-card{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
+.folio-big{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--acc)}
+.warn{background:var(--amber-bg);color:var(--amber);border-radius:var(--r);padding:9px 11px;font-size:12.5px}
+.info{background:var(--acc-lt);color:var(--acc);border-radius:var(--r);padding:9px 11px;font-size:12.5px}
+.live{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--grn);font-weight:600}
+.live:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--grn);animation:pl 1.6s infinite}
 @keyframes pl{50%{opacity:.3}}
+.saldo{font-size:11px;margin-top:4px;font-family:var(--mono)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1.5px solid var(--bdr);border-radius:var(--rl);background:#fff}
+.sw input{width:22px;height:22px;accent-color:var(--red)}
+.row{display:flex;gap:8px;align-items:center}
+.item.compact{cursor:pointer}
+.crow{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.crow .ctext{flex:1;min-width:0}
+.crow .ctext b{font-family:var(--mono);font-size:13px}
+.crow .ctext .d{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .ctext small{display:block;font-size:11px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stp{display:flex;margin:10px 0 2px}
+.stp div{flex:1;text-align:center;font-size:9px;font-weight:700;color:var(--mut2);position:relative;padding-top:15px;text-transform:uppercase;letter-spacing:.03em}
+.stp div:before{content:"";position:absolute;top:2px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--s3);z-index:1;box-sizing:border-box}
+.stp div:after{content:"";position:absolute;top:6px;right:50%;width:100%;height:2px;background:var(--s3)}
+.stp div:first-child:after{display:none}
+.stp div.done{color:var(--acc)}
+.stp div.done:before,.stp div.done:after{background:var(--acc)}
+.stp div.cur{color:var(--txt)}
+.stp div.cur:before{width:14px;height:14px;margin-left:-7px;top:0;border:3px solid var(--acc-lt);background:var(--acc)}
+.stp.rec div.done:before,.stp.rec div.done:after{background:var(--grn)}
+.stp.rec div.done{color:var(--grn)}
+.offline{position:sticky;top:58px;z-index:19;background:var(--amber-bg);color:var(--amber);font-size:12px;font-weight:600;padding:7px 12px;text-align:center;border-bottom:1px solid #E9D9A8}
+.between{justify-content:space-between}
 </style>
 </head>
 <body>
@@ -142,28 +201,32 @@ input.i:focus,select.i:focus,textarea.i:focus{outline:2px solid var(--acc);outli
 <!-- LOGIN -->
 <section id="v-login" class="hidden">
   <div class="login-wrap">
-    <div class="logo">GHC</div>
-    <h2 style="margin:0 0 4px">Requisiciones</h2>
-    <p class="mut" style="margin:0 0 20px">Entra con tu correo y contraseña.</p>
-    <form id="f-login">
-      <label class="f">Correo</label>
-      <input class="i" id="l-email" type="email" autocomplete="username" inputmode="email" required>
-      <label class="f">Contraseña</label>
-      <input class="i" id="l-pass" type="password" autocomplete="current-password" required>
-      <p id="l-err" class="sum-bad small hidden" style="margin:10px 0 0"></p>
-      <button class="btn block" style="margin-top:18px" id="l-btn">Entrar</button>
-    </form>
-    <p class="mut small" style="margin-top:18px">¿No tienes contraseña o la olvidaste? Pídela al área de Compras.</p>
+    <div class="login-card">
+      <div class="fhd"><div class="mark" style="width:28px;height:28px;background:#fff;color:var(--acc);font-size:10px">GHC</div>Requisiciones de material</div>
+      <form id="f-login" style="padding:18px">
+        <p class="mut small" style="margin-bottom:6px">Entra con tu correo y contraseña.</p>
+        <label class="lbl">Correo</label>
+        <input class="i" id="l-email" type="email" autocomplete="username" inputmode="email" required>
+        <label class="lbl">Contraseña</label>
+        <input class="i" id="l-pass" type="password" autocomplete="current-password" required>
+        <p id="l-err" class="sum-bad small hidden" style="margin-top:10px"></p>
+        <button class="btn block" style="margin-top:16px" id="l-btn">Entrar</button>
+        <button type="button" class="btn ghost block" style="margin-top:8px;min-height:40px;font-size:12px" id="l-forgot">¿Olvidaste tu contraseña?</button>
+      </form>
+    </div>
+    <p class="mut small" style="margin-top:14px;text-align:center;font-family:var(--mono);font-size:10px">GHC · Requisiciones</p>
   </div>
 </section>
 
 <!-- APP -->
 <section id="v-app" class="hidden">
   <header class="top">
-    <button class="iconbtn hidden" id="h-back" aria-label="Regresar">←</button>
-    <h1 id="h-title">Requisiciones</h1>
-    <button class="iconbtn" id="h-menu" aria-label="Menú">⋮</button>
+    <button class="ib hidden" id="h-back" aria-label="Regresar">←</button>
+    <div class="mark" id="h-mark">GHC</div>
+    <div class="tt"><h1 id="h-title">Requisiciones</h1><p id="h-sub">GHC · Residente</p></div>
+    <button class="ib" id="h-menu" aria-label="Menú">⋮</button>
   </header>
+  <div id="offline" class="offline hidden">Sin conexión · lo que captures se guarda en tu celular</div>
   <main id="main"></main>
   <div id="bar" class="bar hidden"></div>
 </section>
@@ -174,8 +237,8 @@ const SB_URL='https://fssbqencxpmmjmxgnmpe.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzc2JxZW5jeHBtbWpteGdubXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NzM5NzUsImV4cCI6MjA3MDI0OTk3NX0.fsWpdmHPaKYn8P767fo5rqPHkBsQbDjplXs2xbGg9MY';
 const BUCKET='requisiciones';
 const PDF_KEEP_MAX=3*1024*1024, FILE_MAX=20*1024*1024;
-const UNIDADES=['Pza','Bulto','Saco','Kg','Ton','m','m²','m³','Lt','Galón','Cubeta','Caja','Rollo','Tramo','Hoja','Juego','Paquete','Lote','Servicio','Viaje'];
-const sb=supabase.createClient(SB_URL,SB_KEY,{db:{schema:'ops'},auth:{persistSession:true,autoRefreshToken:true,storageKey:'ghc-req-auth'}});
+const UNIDADES=['Pza','Bulto','Saco','Kg','Ton','m','m²','m³','Lt','Galón','Cubeta','Caja','Bolsa','Rollo','Tramo','Hoja','Par','Juego','Paquete','Lote','Servicio','Viaje','Día'];
+const sb=supabase.createClient(SB_URL,SB_KEY,{db:{schema:'ops'},auth:{persistSession:true,autoRefreshToken:true,storageKey:'ghc-req-auth',detectSessionInUrl:true}});
 
 /* ================= HELPERS ================= */
 const $=s=>document.querySelector(s);
@@ -185,16 +248,20 @@ const todayISO=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezone
 const fDate=s=>{if(!s)return'—';const d=new Date(s.length<=10?s+'T12:00:00':s);return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})};
 const fDT=s=>s?new Date(s).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
 const fNum=n=>Number(n||0).toLocaleString('es-MX',{maximumFractionDigits:3});
+const fMoney=n=>Number(n||0).toLocaleString('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
 const fBytes=b=>b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+const num=v=>Number(String(v??'').replace(',','.'))||0;
 const stCls=s=>'st-'+String(s||'').replace(/%/g,'').replace(/\s+/g,'-');
-const chip=s=>`<span class="chip ${stCls(s)}">${esc(s)}</span>`;
-function toast(msg,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),err?5000:2600)}
+const chip=s=>`<span class="bdg ${stCls(s)}">${esc(s)}</span>`;
+function toast(msg,kind){const t=document.createElement('div');t.className='toast'+(kind?' '+kind:'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),kind==='err'?5000:2800)}
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
 const ENTREGA_LBL={obra:'Entrega en obra',otra_direccion:'Entrega en otra dirección',recoger:'Recoger en otro lugar'};
 const ENTREGA_ICO={obra:'📍',otra_direccion:'🚚',recoger:'🏬'};
+const ICO_SEARCH='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
 function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`))return res();const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('No se pudo cargar '+src));document.head.appendChild(s)})}
+const safeName=n=>String(n||'archivo').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w.\-]+/g,'_').slice(-80);
 
-/* ===== IndexedDB para guardar archivos del borrador ===== */
+/* ===== IndexedDB para archivos del borrador ===== */
 const IDB={db:null,
   open(){return this.db?Promise.resolve(this.db):new Promise((res,rej)=>{const r=indexedDB.open('ghc-req',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>{this.db=r.result;res(this.db)};r.onerror=()=>rej(r.error)})},
   async put(k,v){const db=await this.open();return new Promise((res,rej)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').put(v,k);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})},
@@ -202,7 +269,7 @@ const IDB={db:null,
   async del(k){const db=await this.open();return new Promise(res=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').delete(k);tx.oncomplete=res;tx.onerror=res})}
 };
 
-/* ===== Compresión de archivos ===== */
+/* ===== Compresión ===== */
 async function compressImage(file){
   let bmp;
   try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'})}catch(e){bmp=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=URL.createObjectURL(file)})}
@@ -233,7 +300,7 @@ async function compressPdf(file,onProgress){
       const img=await out.embedJpg(await jpg.arrayBuffer());
       const pg=out.addPage([vp1.width,vp1.height]);pg.drawImage(img,{x:0,y:0,width:vp1.width,height:vp1.height});
     }
-    const bytes=await out.save();const blob=new Blob([bytes],{type:'application/pdf'});
+    const blob=new Blob([await out.save()],{type:'application/pdf'});
     if(blob.size<file.size) return {blob,name:file.name,mime:'application/pdf'};
   }catch(e){console.warn('PDF sin comprimir',e)}
   return {blob:file,name:file.name,mime:'application/pdf'};
@@ -247,15 +314,22 @@ async function processFile(file,onProgress){
   if(r.blob.size>FILE_MAX) throw new Error('El archivo sigue pesando más de 20 MB');
   return r;
 }
+async function uploadBlob(folio,partida,r){
+  const path=`${folio}/${partida?'p'+partida:'general'}/${Date.now()}_${safeName(r.name)}`;
+  const up=await sb.storage.from(BUCKET).upload(path,r.blob,{contentType:r.mime,upsert:false});
+  if(up.error)throw new Error('No se pudo subir '+r.name+': '+up.error.message);
+  return {path,url:sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl};
+}
+function pickRaw(camera,multiple){return new Promise(res=>{const inp=document.createElement('input');inp.type='file';inp.accept=camera?'image/*':'image/*,application/pdf';if(camera)inp.capture='environment';if(multiple&&!camera)inp.multiple=true;inp.onchange=()=>res([...inp.files]);inp.click()})}
 
 /* ================= STATE ================= */
-const S={session:null,me:null,projects:null,rfpCache:{},view:'home',tab:'mias',q:'',draft:null,channel:null,detail:null};
+const S={session:null,me:null,projects:null,rfpCache:{},saldo:{},tab:'mias',q:'',draft:null,channel:null,homeCh:null,myStatus:{}};
 
 /* ================= AUTH ================= */
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();
-  if(session){S.session=session;if(await loadMe())return showApp()}
-  showLogin();
+  if(session&&!S.recovery){S.session=session;if(await loadMe())return showApp()}
+  if(!S.recovery)showLogin();
 }
 async function loadMe(){
   const email=(S.session.user.email||'').toLowerCase();
@@ -264,7 +338,7 @@ async function loadMe(){
   S.me=data;return true;
 }
 function showLogin(){$('#v-app').classList.add('hidden');$('#v-login').classList.remove('hidden')}
-function showApp(){$('#v-login').classList.add('hidden');$('#v-app').classList.remove('hidden');route()}
+function showApp(){$('#v-login').classList.add('hidden');$('#v-app').classList.remove('hidden');startHomeWatch();route()}
 $('#f-login').addEventListener('submit',async e=>{
   e.preventDefault();const btn=$('#l-btn');btn.disabled=true;btn.innerHTML='<div class="spin"></div>';$('#l-err').classList.add('hidden');
   const {data,error}=await sb.auth.signInWithPassword({email:$('#l-email').value.trim(),password:$('#l-pass').value});
@@ -272,26 +346,66 @@ $('#f-login').addEventListener('submit',async e=>{
   if(error){$('#l-err').textContent=error.message.includes('Invalid')?'Correo o contraseña incorrectos':error.message;$('#l-err').classList.remove('hidden');return}
   S.session=data.session;if(await loadMe())showApp();
 });
+$('#l-forgot').onclick=async()=>{
+  const email=$('#l-email').value.trim();
+  if(!email){toast('Escribe tu correo arriba y vuelve a tocar aquí','err');$('#l-email').focus();return}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  if(error)toast(error.message,'err');else toast('Te enviamos un correo para crear una contraseña nueva','ok');
+};
+sb.auth.onAuthStateChange((ev,session)=>{
+  if(ev==='PASSWORD_RECOVERY'){S.recovery=true;showRecovery()}
+  if(ev==='SIGNED_OUT'){S.me=null;showLogin()}
+});
+function showRecovery(){
+  $('#v-app').classList.add('hidden');$('#v-login').classList.remove('hidden');
+  $('#f-login').innerHTML=`<p class="small" style="margin-bottom:6px"><b>Crea tu contraseña nueva</b></p>
+   <label class="lbl">Contraseña nueva (mín. 8)</label><input class="i" id="r-p1" type="password" autocomplete="new-password">
+   <label class="lbl">Repítela</label><input class="i" id="r-p2" type="password" autocomplete="new-password">
+   <button type="button" class="btn block" style="margin-top:16px" id="r-ok">Guardar y entrar</button>`;
+  $('#r-ok').onclick=async()=>{const a=$('#r-p1').value,b=$('#r-p2').value;
+    if(a.length<8)return toast('Mínimo 8 caracteres','err');if(a!==b)return toast('No coinciden','err');
+    const {error}=await sb.auth.updateUser({password:a});if(error)return toast(error.message,'err');
+    toast('Contraseña actualizada','ok');history.replaceState(null,'',location.pathname);location.reload()};
+}
 $('#h-menu').onclick=()=>{
-  sheet(`<h3>${esc(S.me.nombre||S.me.email)}</h3><p class="mut small" style="margin-top:-6px">${esc(S.me.email)}</p>
-  <button class="btn ghost block" id="m-ref" style="margin-bottom:10px">↻ Actualizar</button>
-  <button class="btn danger block" id="m-out">Cerrar sesión</button>`,o=>{
+  sheet(`<h3>${esc(S.me.nombre||S.me.email)}</h3><p class="mut small" style="margin:-4px 0 12px;font-family:var(--mono)">${esc(S.me.email)}</p>
+  <button class="btn ghost block" id="m-ref" style="margin-bottom:8px">↻ Actualizar</button>
+  <button class="btn ghost block" id="m-pw" style="margin-bottom:8px">🔑 Cambiar mi contraseña</button>
+  <button class="btn red block" id="m-out">Cerrar sesión</button>`,o=>{
     o.querySelector('#m-ref').onclick=()=>{closeSheet();location.reload()};
+    o.querySelector('#m-pw').onclick=()=>{closeSheet();changePw()};
     o.querySelector('#m-out').onclick=async()=>{await sb.auth.signOut();location.hash='';location.reload()};
   });
 };
+function changePw(){
+  sheet(`<h3>Cambiar contraseña</h3><label class="lbl">Nueva (mín. 8)</label><input class="i" id="c1" type="password" autocomplete="new-password"><label class="lbl">Repítela</label><input class="i" id="c2" type="password" autocomplete="new-password"><button class="btn block" id="cok" style="margin-top:14px">Guardar</button>`,o=>{
+    o.querySelector('#cok').onclick=async()=>{const a=o.querySelector('#c1').value,b=o.querySelector('#c2').value;if(a.length<8)return toast('Mínimo 8 caracteres','err');if(a!==b)return toast('No coinciden','err');
+      const {error}=await sb.auth.updateUser({password:a});if(error)return toast(error.message,'err');closeSheet();toast('Contraseña actualizada','ok')};
+  });
+}
+
+/* Avisos: cambios en mis requisiciones */
+async function startHomeWatch(){
+  const {data}=await sb.from('requisicion').select('req_uuid,folio,estatus').eq('solicitante_email',S.me.email);
+  (data||[]).forEach(r=>S.myStatus[r.req_uuid]=r);
+  S.homeCh=sb.channel('mine').on('postgres_changes',{event:'UPDATE',schema:'ops',table:'requisicion',filter:`solicitante_email=eq.${S.me.email}`},p=>{
+    const n=p.new,o=S.myStatus[n.req_uuid];
+    if(o&&o.estatus!==n.estatus){toast(`${n.folio}: ${n.estatus}`,'ok');navigator.vibrate&&navigator.vibrate([80,60,80])}
+    S.myStatus[n.req_uuid]={req_uuid:n.req_uuid,folio:n.folio,estatus:n.estatus};
+  }).subscribe();
+}
 
 /* ================= ROUTER ================= */
 window.addEventListener('hashchange',route);
 $('#h-back').onclick=()=>history.length>1?history.back():(location.hash='');
 function route(){
   if(!S.me)return;
-  const h=location.hash.slice(1);unsub();
+  const h=location.hash.slice(1);unsub();closeSheet();
   if(h.startsWith('req/'))return viewDetail(h.slice(4));
   if(h==='nueva')return viewNueva();
   return viewHome();
 }
-function setHeader(title,back){$('#h-title').textContent=title;$('#h-back').classList.toggle('hidden',!back)}
+function setHeader(title,sub,back){$('#h-title').textContent=title;$('#h-sub').textContent=sub||'GHC · Residente';$('#h-back').classList.toggle('hidden',!back);$('#h-mark').classList.toggle('hidden',!!back)}
 function setBar(html){const b=$('#bar');if(!html){b.classList.add('hidden');b.innerHTML='';return}b.innerHTML=html;b.classList.remove('hidden')}
 function unsub(){if(S.channel){sb.removeChannel(S.channel);S.channel=null}}
 
@@ -311,32 +425,38 @@ async function getProjects(){
 }
 async function getRfps(project_uuid){
   const {data,error}=await sb.from('rfp').select('rfp_uuid,rfp_number,titulo,rfp_kind,project_uuid').eq('project_uuid',project_uuid).eq('status','Aprobada').order('rfp_number',{ascending:false});
-  if(error)throw error;data.forEach(r=>S.rfpCache[r.rfp_uuid]=r);return data;
+  if(error)throw error;data.forEach(r=>S.rfpCache[r.rfp_uuid]=r);
+  const ids=data.map(r=>r.rfp_uuid).filter(id=>!(id in S.saldo));
+  if(ids.length){const {data:s}=await sb.from('v_rfp_saldo').select('rfp_uuid,monto_rfp,comprometido,pct_comprometido').in('rfp_uuid',ids);(s||[]).forEach(x=>S.saldo[x.rfp_uuid]=x)}
+  return data;
 }
+function saldoHtml(id){const s=S.saldo[id];if(!s||!s.monto_rfp)return'';const p=Number(s.pct_comprometido||0);
+  return`<div class="saldo" style="color:${p>100?'var(--red)':p>85?'var(--amber)':'var(--mut)'}">En OC: ${fMoney(s.comprometido)} de ${fMoney(s.monto_rfp)} (${Math.round(p)}%)${p>100?' · rebasado':''}</div>`}
 const isMine=p=>S.me.resident_id&&(p.resident_id===S.me.resident_id||p.supervisor_id===S.me.resident_id);
 const projAddr=p=>p?[p.project_address,p.project_city_state].filter(Boolean).join(', '):'';
 const projById=id=>(S.projects||[]).find(p=>p.project_uuid===id);
 
 /* ================= HOME ================= */
+let LIST=[],HFILT='abiertas';
 async function viewHome(){
-  setHeader('Requisiciones',false);
-  setBar('');
+  setHeader('Requisiciones','GHC · Residente',false);setBar('');
   const m=$('#main');
   m.innerHTML=`<div class="tabs"><button data-t="mias" class="${S.tab==='mias'?'on':''}">Mis requisiciones</button><button data-t="obras" class="${S.tab==='obras'?'on':''}">De mis obras</button></div>
-  <div class="search" style="margin-bottom:12px"><input class="i" id="q" placeholder="Buscar folio, obra, partida…" value="${esc(S.q)}"></div>
-  <div class="row between" style="margin:0 2px 8px"><span class="live">En vivo</span><span class="mut small" id="cnt"></span></div>
+  <div class="sbox" style="margin-bottom:8px">${ICO_SEARCH}<input class="i" id="q" placeholder="Folio, obra, material…" value="${esc(S.q)}"></div>
+  <div class="chips" style="margin-bottom:10px">${[['abiertas','Abiertas'],['recibir','Por recibir'],['pagadas','Pagadas'],['todas','Todas']].map(([k,l])=>`<span class="chip ${HFILT===k?'on':''}" data-f="${k}">${l}</span>`).join('')}</div>
+  <div class="row between" style="margin:0 2px 7px"><span class="live">En vivo</span><span class="mut small" id="cnt"></span></div>
   <div id="lst"><div class="center"><div class="spin d"></div></div></div>
   <button class="btn fab" id="b-new">＋ Nueva requisición</button>`;
   m.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;viewHome()});
+  m.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{HFILT=b.dataset.f;m.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));renderList()});
   $('#q').oninput=debounce(e=>{S.q=e.target.value;renderList()},250);
   $('#b-new').onclick=()=>location.hash='nueva';
   await loadList();
   S.channel=sb.channel('home').on('postgres_changes',{event:'*',schema:'ops',table:'requisicion'},debounce(loadList,600)).subscribe();
 }
-let LIST=[];
 async function loadList(){
   try{
-    let q=sb.from('v_requisicion').select('req_uuid,folio,project_id,project_name,client_name,solicitante_nombre,solicitante_email,estatus,pct_oc,pct_pagado,total_items,n_pendiente,n_en_compra,n_en_pago,n_pagado,proxima_fecha,rfps,created_at').order('created_at',{ascending:false}).limit(200);
+    let q=sb.from('v_req').select('req_uuid,folio,project_id,project_name,client_name,solicitante_nombre,solicitante_email,estatus,pct_oc,pct_pagado,pct_recibido,total_items,proxima_fecha,rfps,urgente,items_txt,created_at').order('created_at',{ascending:false}).limit(300);
     if(S.tab==='mias') q=q.eq('solicitante_email',S.me.email);
     else{
       const ps=(await getProjects()).filter(isMine).map(p=>p.project_uuid);
@@ -344,57 +464,51 @@ async function loadList(){
       q=q.in('project_uuid',ps).neq('solicitante_email',S.me.email);
     }
     const {data,error}=await q;if(error)throw error;LIST=data;renderList();
-  }catch(e){$('#lst').innerHTML=`<div class="empty">No se pudo cargar: ${esc(e.message)}</div>`}
+  }catch(e){const el=$('#lst');if(el)el.innerHTML=`<div class="empty">No se pudo cargar: ${esc(e.message)}</div>`}
 }
 function renderList(emptyMsg){
   const el=$('#lst');if(!el)return;
   const q=S.q.trim().toLowerCase();
-  const rows=LIST.filter(r=>!q||[r.folio,r.project_id,r.project_name,r.client_name,r.rfps,r.solicitante_nombre].join(' ').toLowerCase().includes(q));
+  const f={abiertas:r=>!['Pagada','Cancelada'].includes(r.estatus),recibir:r=>r.estatus!=='Cancelada'&&r.pct_oc>0&&(r.pct_recibido||0)<100,pagadas:r=>r.estatus==='Pagada',todas:()=>true}[HFILT];
+  const rows=LIST.filter(f).filter(r=>!q||[r.folio,r.project_id,r.project_name,r.client_name,r.rfps,r.solicitante_nombre,r.items_txt].join(' ').toLowerCase().includes(q));
   $('#cnt').textContent=rows.length?rows.length+' requisiciones':'';
-  if(!rows.length){el.innerHTML=`<div class="empty">${esc(emptyMsg||(S.tab==='mias'?'Aún no has hecho requisiciones.\nToca “Nueva requisición”.':'No hay requisiciones de otros en tus obras.'))}</div>`;return}
-  el.innerHTML=rows.map(r=>`<a class="list-item" href="#req/${r.req_uuid}">
-    <div class="row between"><span class="mono" style="font-weight:500">${esc(r.folio)}</span>${chip(r.estatus)}</div>
-    <div style="font-weight:600;margin-top:6px">${esc(r.project_id?r.project_id+' · ':'')}${esc(r.project_name)}</div>
-    <div class="mut small">${esc(r.client_name||'')}${S.tab==='obras'?' · Pidió '+esc(r.solicitante_nombre||r.solicitante_email):''}</div>
-    <div class="row between small mut" style="margin-top:6px"><span>${r.total_items} partida${r.total_items==1?'':'s'} · ${fDate(r.created_at)}</span><span>${r.pct_oc>=100?'✅ 100% con OC':Math.round(r.pct_oc)+'% con OC'}</span></div>
+  if(!rows.length){el.innerHTML=`<div class="empty">${esc(emptyMsg||(S.tab==='mias'&&!LIST.length?'Aún no has hecho requisiciones.\nToca “Nueva requisición”.':'No hay requisiciones en este filtro.'))}</div>`;return}
+  el.innerHTML=rows.map(r=>`<a class="ritem" href="#req/${r.req_uuid}">
+    <div class="row between"><span class="ri-num">${esc(r.folio)}</span><span>${r.urgente?'<span class="bdg b-urg">Urgente</span> ':''}${chip(r.estatus)}</span></div>
+    <div class="ri-tit">${esc(r.project_id?r.project_id+' · ':'')}${esc(r.project_name)}</div>
+    <div class="ri-sub">${esc(r.client_name||'')}${S.tab==='obras'?' · Pidió '+esc(r.solicitante_nombre||r.solicitante_email):''}</div>
+    <div class="row between ri-sub" style="margin-top:5px"><span>${r.total_items} partida${r.total_items==1?'':'s'} · ${fDate(r.created_at)}</span><span class="mono">${r.pct_oc>=100?'✅ 100% OC':Math.round(r.pct_oc)+'% OC'}${(r.pct_recibido||0)>0?' · '+Math.round((r.pct_recibido||0))+'% recib.':''}</span></div>
     <div class="prog"><div style="width:${Math.min(100,r.pct_oc)}%"></div></div>
   </a>`).join('');
 }
 
 /* ================= NUEVA ================= */
 const DKEY=()=>'ghc-req-draft-'+S.me.email;
-function newDraft(){return{client_ref:uid(),step:1,project_uuid:null,split:[],fecha_default:'',entrega_default:{tipo:'obra'},items:[newItem()],notas:'',files:[]}}
-function newItem(base){return{id:uid(),descripcion:'',cantidad:'',unidad:'Pza',especificacion:'',notas:'',fecha_requerida:base?.fecha_requerida||'',entrega:base?.entrega?{...base.entrega}:null,split:[],showMore:false}}
-function saveDraft(){if(S.draft)localStorage.setItem(DKEY(),JSON.stringify(S.draft))}
+function newDraft(){return{client_ref:uid(),step:1,project_uuid:null,split:[],fecha_default:'',entrega_default:{tipo:'obra'},items:[newItem()],notas:'',urgente:false,files:[]}}
+function newItem(base){return{open:true,id:uid(),descripcion:base?.descripcion||'',cantidad:base?.cantidad??'',unidad:base?.unidad||'Pza',especificacion:base?.especificacion||'',notas:'',fecha_requerida:base?.fecha_requerida||'',entrega:base?.entrega?{...base.entrega}:null,split:[],showMore:!!base?.especificacion}}
+function saveDraft(){if(S.draft)try{localStorage.setItem(DKEY(),JSON.stringify(S.draft))}catch(e){}}
 async function clearDraft(){if(S.draft)for(const f of S.draft.files)await IDB.del(f.id);localStorage.removeItem(DKEY());S.draft=null}
 
 async function viewNueva(){
-  setHeader('Nueva requisición',true);
+  setHeader('Nueva requisición','GHC · Residente',true);
+  try{await getProjects()}catch(e){toast('No se pudieron cargar las obras','err')}
   if(!S.draft){
-    const raw=localStorage.getItem(DKEY());
-    if(raw){
-      let d;try{d=JSON.parse(raw)}catch(e){}
-      if(d&&d.items){
-        S.draft=d;
-        sheet(`<h3>Tienes un borrador sin enviar</h3><p class="mut">Del ${esc(projById(d.project_uuid)?.project_name||'proyecto sin elegir')} · ${d.items.length} partida(s).</p>
-          <button class="btn block" id="d-go" style="margin-bottom:10px">Continuar borrador</button><button class="btn ghost block" id="d-new">Empezar de cero</button>`,o=>{
-          o.querySelector('#d-go').onclick=()=>{closeSheet();renderStep()};
-          o.querySelector('#d-new').onclick=async()=>{closeSheet();await clearDraft();S.draft=newDraft();saveDraft();renderStep()};
-        });
-      }
+    let d=null;try{d=JSON.parse(localStorage.getItem(DKEY())||'null')}catch(e){}
+    if(d&&d.items){
+      S.draft=d;renderStep();
+      sheet(`<h3>Tienes un borrador sin enviar</h3><p class="mut small" style="margin-bottom:12px">${esc(projById(d.project_uuid)?.project_name||'Sin obra elegida')} · ${d.items.length} partida(s)</p>
+        <button class="btn block" id="d-go" style="margin-bottom:8px">Continuar borrador</button><button class="btn ghost block" id="d-new">Empezar de cero</button>`,o=>{
+        o.querySelector('#d-go').onclick=()=>closeSheet();
+        o.querySelector('#d-new').onclick=async()=>{closeSheet();await clearDraft();S.draft=newDraft();saveDraft();renderStep()};
+      });
+      return;
     }
-    if(!S.draft){S.draft=newDraft();saveDraft()}
+    S.draft=newDraft();saveDraft();
   }
-  try{await getProjects()}catch(e){toast('No se pudieron cargar las obras',true)}
   renderStep();
 }
 function stepsBar(n){return`<div class="steps">${[1,2,3,4].map(i=>`<div class="${i<=n?'on':''}"></div>`).join('')}</div>`}
-
-function renderStep(){
-  const d=S.draft;if(!d)return;saveDraft();
-  window.scrollTo(0,0);
-  ({1:step1,2:step2,3:step3,4:step4})[d.step]();
-}
+function renderStep(){const d=S.draft;if(!d)return;saveDraft();window.scrollTo(0,0);({1:step1,2:step2,3:step3,4:step4})[d.step]()}
 
 /* --- Paso 1: obra --- */
 let OBRA_TAB='mis';
@@ -402,21 +516,18 @@ function step1(){
   const d=S.draft,m=$('#main');
   const mine=(S.projects||[]).filter(isMine);
   if(!mine.length&&OBRA_TAB==='mis')OBRA_TAB='todas';
-  m.innerHTML=`${stepsBar(1)}<p class="step-h">¿Para qué obra?</p><p class="mut small" style="margin:0 0 12px">Paso 1 de 4</p>
+  m.innerHTML=`${stepsBar(1)}<p class="step-h">¿Para qué obra?</p><p class="mut small" style="margin:2px 0 12px;font-family:var(--mono)">Paso 1 de 4</p>
   <div class="tabs"><button data-t="mis" class="${OBRA_TAB==='mis'?'on':''}">Mis obras (${mine.length})</button><button data-t="todas" class="${OBRA_TAB==='todas'?'on':''}">Todas</button></div>
-  <div class="search" style="margin-bottom:10px"><input class="i" id="qo" placeholder="Buscar obra, clave o cliente"></div><div id="ol"></div>`;
+  <div class="sbox" style="margin-bottom:9px">${ICO_SEARCH}<input class="i" id="qo" placeholder="Obra, clave o cliente"></div><div id="ol"></div>`;
   m.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{OBRA_TAB=b.dataset.t;step1()});
   const draw=()=>{
     const q=$('#qo').value.trim().toLowerCase();
     const src=OBRA_TAB==='mis'?mine:(S.projects||[]);
     const rows=src.filter(p=>!q||[p.project_id,p.project_name,p.client?.client_name,p.project_city_state].join(' ').toLowerCase().includes(q)).slice(0,120);
-    $('#ol').innerHTML=rows.length?rows.map(p=>`<div class="pick radio ${d.project_uuid===p.project_uuid?'on':''}" data-id="${p.project_uuid}"><div class="ck">✓</div><div class="grow">
-      <div style="font-weight:600">${esc(p.project_id?p.project_id+' · ':'')}${esc(p.project_name)}</div>
-      <div class="mut small">${esc(p.client?.client_name||'')}${p.project_city_state?' · '+esc(p.project_city_state):''}</div></div></div>`).join(''):'<div class="empty">Sin resultados</div>';
-    $('#ol').querySelectorAll('.pick').forEach(el=>el.onclick=()=>{
-      if(d.project_uuid!==el.dataset.id){d.project_uuid=el.dataset.id;d.split=[]}
-      d.step=2;renderStep();
-    });
+    $('#ol').innerHTML=rows.length?rows.map(p=>`<div class="pick radio ${d.project_uuid===p.project_uuid?'on':''}" data-id="${p.project_uuid}"><div class="ck">✓</div><div style="flex:1;min-width:0">
+      <div class="ri-num">${esc(p.project_id||'')}</div><div style="font-weight:600;font-size:13px">${esc(p.project_name)}</div>
+      <div class="ri-sub">${esc(p.client?.client_name||'')}${p.project_city_state?' · '+esc(p.project_city_state):''}</div></div></div>`).join(''):'<div class="empty">Sin resultados</div>';
+    $('#ol').querySelectorAll('.pick').forEach(el=>el.onclick=()=>{if(d.project_uuid!==el.dataset.id){d.project_uuid=el.dataset.id;d.split=[]}d.step=2;renderStep()});
   };
   $('#qo').oninput=debounce(draw,150);draw();
   setBar(d.project_uuid?`<button class="btn" id="n1">Siguiente →</button>`:'');
@@ -424,65 +535,56 @@ function step1(){
 }
 
 /* --- Paso 2: RFP y split --- */
-function rebalance(split){
-  if(!split.length)return;const n=split.length,base=Math.floor(10000/n)/100;
-  split.forEach((s,i)=>s.pct=i===n-1?+(100-base*(n-1)).toFixed(2):base);
-}
+function rebalance(split){if(!split.length)return;const n=split.length,base=Math.floor(10000/n)/100;split.forEach((s,i)=>s.pct=i===n-1?+(100-base*(n-1)).toFixed(2):base)}
 const sumPct=sp=>+sp.reduce((a,s)=>a+Number(s.pct||0),0).toFixed(2);
-const rfpLabel=id=>{const r=S.rfpCache[id];return r?`${r.rfp_number||'(sin número)'}${r.titulo?' · '+r.titulo:''}`:'RFP'};
+async function ensureRfps(ids){const miss=ids.filter(id=>!S.rfpCache[id]);if(miss.length){const {data}=await sb.from('rfp').select('rfp_uuid,rfp_number,titulo,rfp_kind,project_uuid').in('rfp_uuid',miss);(data||[]).forEach(r=>S.rfpCache[r.rfp_uuid]=r)}}
 async function step2(){
   const d=S.draft,m=$('#main'),p=projById(d.project_uuid);
-  m.innerHTML=`${stepsBar(2)}<p class="step-h">¿A qué RFP se carga?</p><p class="mut small" style="margin:0 0 12px">Paso 2 de 4 · ${esc(p?.project_name||'')}</p>
+  m.innerHTML=`${stepsBar(2)}<p class="step-h">¿A qué RFP se carga?</p><p class="mut small" style="margin:2px 0 12px;font-family:var(--mono)">Paso 2 de 4 · ${esc(p?.project_name||'')}</p>
    <div id="rl"><div class="center"><div class="spin d"></div></div></div>
-   <button class="btn ghost block sm" id="otra" style="margin-top:4px">＋ Agregar RFP de otra obra</button>
-   <div id="sp"></div>`;
-  let rfps=[];
-  try{rfps=await getRfps(d.project_uuid)}catch(e){toast('Error al cargar RFP',true)}
-  // asegura que RFP de otras obras ya elegidas estén en caché
-  const missing=d.split.filter(s=>!S.rfpCache[s.rfp_uuid]).map(s=>s.rfp_uuid);
-  if(missing.length){const {data}=await sb.from('rfp').select('rfp_uuid,rfp_number,titulo,rfp_kind,project_uuid').in('rfp_uuid',missing);(data||[]).forEach(r=>S.rfpCache[r.rfp_uuid]=r)}
+   <button class="btn-add" id="otra" style="margin-top:2px">＋ Agregar RFP de otra obra</button><div id="sp"></div>`;
+  let rfps=[];try{rfps=await getRfps(d.project_uuid)}catch(e){toast('Error al cargar RFP','err')}
+  await ensureRfps(d.split.map(s=>s.rfp_uuid));
   const drawRfps=()=>{
-    $('#rl').innerHTML=rfps.length?rfps.map(r=>{const on=d.split.some(s=>s.rfp_uuid===r.rfp_uuid);return`<div class="pick ${on?'on':''}" data-id="${r.rfp_uuid}"><div class="ck">✓</div><div class="grow">
-      <div class="mono" style="font-weight:500">${esc(r.rfp_number||'(sin número)')}</div><div class="small">${esc(r.titulo||'')}</div></div></div>`}).join('')
-      :'<div class="warn">Esta obra no tiene RFP aprobadas. Puedes agregar una de otra obra o pedir que aprueben la RFP.</div>';
+    $('#rl').innerHTML=rfps.length?rfps.map(r=>{const on=d.split.some(s=>s.rfp_uuid===r.rfp_uuid);return`<div class="pick ${on?'on':''}" data-id="${r.rfp_uuid}"><div class="ck">✓</div><div style="flex:1;min-width:0">
+      <div class="ri-num">${esc(r.rfp_number||'(sin número)')}</div><div class="small">${esc(r.titulo||'')}</div>${saldoHtml(r.rfp_uuid)}</div></div>`}).join('')
+      :'<div class="warn">Esta obra no tiene RFP aprobadas. Agrega una de otra obra o pide que aprueben la RFP.</div>';
     $('#rl').querySelectorAll('.pick').forEach(el=>el.onclick=()=>{
       const i=d.split.findIndex(s=>s.rfp_uuid===el.dataset.id);
       if(i>=0)d.split.splice(i,1);else d.split.push({rfp_uuid:el.dataset.id,pct:0});
       rebalance(d.split);saveDraft();drawRfps();drawSplit();
     });
   };
+  const updBar=()=>{const ok=d.split.length&&Math.abs(sumPct(d.split)-100)<0.01;
+    setBar(`<button class="btn ghost" id="b1">← Atrás</button><button class="btn" id="n2" ${ok?'':'disabled'}>Siguiente →</button>`);
+    $('#b1').onclick=()=>{d.step=1;renderStep()};$('#n2').onclick=()=>{d.step=3;renderStep()}};
   const drawSplit=()=>{
-    const el=$('#sp');if(!d.split.length){el.innerHTML='';setBar('<button class="btn ghost" id="b1">← Atrás</button>');$('#b1').onclick=()=>{d.step=1;renderStep()};return}
+    const el=$('#sp');if(!d.split.length){el.innerHTML='';updBar();return}
     const sum=sumPct(d.split);
-    el.innerHTML=`<p class="sec-title">Reparto (split)</p><div class="card">${d.split.map((s,i)=>{const r=S.rfpCache[s.rfp_uuid];const other=r&&r.project_uuid!==d.project_uuid;return`<div class="row" style="margin-bottom:8px">
-      <div class="grow"><div class="mono small" style="font-weight:500">${esc(r?.rfp_number||'RFP')}</div><div class="mut small">${other?'Otra obra: '+esc(projById(r.project_uuid)?.project_name||''):esc(r?.titulo||'')}</div></div>
-      <input class="i pctin" inputmode="decimal" data-i="${i}" value="${s.pct}"><span>%</span>${other?`<button class="btn danger sm" data-del="${i}">✕</button>`:''}</div>`}).join('')}
-      <div class="row between" style="border-top:1px solid var(--bdr);padding-top:8px"><button class="btn ghost sm" id="eq">Repartir igual</button><span class="${Math.abs(sum-100)<0.01?'sum-ok':'sum-bad'}">Suma: ${sum}%</span></div></div>
-      <p class="mut small">Este reparto aplica a todas las partidas. En el siguiente paso puedes darle un split especial a una partida.</p>`;
-    el.querySelectorAll('.pctin').forEach(inp=>inp.oninput=()=>{d.split[inp.dataset.i].pct=Number(inp.value.replace(',','.'))||0;saveDraft();const s=sumPct(d.split);const sp=el.querySelector('.sum-ok,.sum-bad');sp.className=Math.abs(s-100)<0.01?'sum-ok':'sum-bad';sp.textContent='Suma: '+s+'%';updBar()});
-    el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{d.split.splice(+b.dataset.del,1);rebalance(d.split);saveDraft();drawSplit()});
+    el.innerHTML=`<p class="stitle">Reparto (split)</p><div class="dcard"><div class="dcard-bd">${d.split.map((s,i)=>{const r=S.rfpCache[s.rfp_uuid];const other=r&&r.project_uuid!==d.project_uuid;return`<div class="row" style="margin-bottom:8px">
+      <div style="flex:1;min-width:0"><div class="ri-num">${esc(r?.rfp_number||'RFP')}</div><div class="ri-sub">${other?'Otra obra: '+esc(projById(r.project_uuid)?.project_name||''):esc(r?.titulo||'')}</div></div>
+      <input class="i pctin" inputmode="decimal" data-i="${i}" value="${s.pct}"><span class="mut">%</span>${other?`<button class="abtn red" data-del="${i}">✕</button>`:''}</div>`}).join('')}
+      <div class="row between" style="border-top:1px solid var(--bdr);padding-top:8px"><button class="abtn" id="eq">Repartir igual</button><span id="sumv" class="${Math.abs(sum-100)<0.01?'sum-ok':'sum-bad'} mono">Suma: ${sum}%</span></div></div></div>
+      <p class="mut small">Aplica a todas las partidas. En el paso 3 puedes darle un split especial a una partida.</p>`;
+    el.querySelectorAll('.pctin').forEach(inp=>inp.oninput=()=>{d.split[inp.dataset.i].pct=num(inp.value);saveDraft();const s=sumPct(d.split);const sp=$('#sumv');sp.className=(Math.abs(s-100)<0.01?'sum-ok':'sum-bad')+' mono';sp.textContent='Suma: '+s+'%';updBar()});
+    el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{d.split.splice(+b.dataset.del,1);rebalance(d.split);saveDraft();drawRfps();drawSplit()});
     $('#eq').onclick=()=>{rebalance(d.split);saveDraft();drawSplit()};
     updBar();
-  };
-  const updBar=()=>{
-    const ok=d.split.length&&Math.abs(sumPct(d.split)-100)<0.01;
-    setBar(`<button class="btn ghost" id="b1">← Atrás</button><button class="btn" id="n2" ${ok?'':'disabled'}>Siguiente →</button>`);
-    $('#b1').onclick=()=>{d.step=1;renderStep()};$('#n2').onclick=()=>{d.step=3;renderStep()};
   };
   $('#otra').onclick=()=>pickOtherRfp(()=>{drawRfps();drawSplit()});
   drawRfps();drawSplit();
 }
 function pickOtherRfp(done){
   const d=S.draft;
-  const o=sheet(`<h3>RFP de otra obra</h3><div class="search" style="margin-bottom:10px"><input class="i" id="qq" placeholder="Buscar obra"></div><div id="pp" style="max-height:60vh;overflow:auto"></div>`,o=>{
+  sheet(`<h3>RFP de otra obra</h3><div class="sbox" style="margin-bottom:9px">${ICO_SEARCH}<input class="i" id="qq" placeholder="Buscar obra"></div><div id="pp" style="max-height:60vh;overflow:auto"></div>`,o=>{
     const pp=o.querySelector('#pp');
     const drawP=()=>{const q=o.querySelector('#qq').value.trim().toLowerCase();
       pp.innerHTML=(S.projects||[]).filter(p=>p.project_uuid!==d.project_uuid&&(!q||[p.project_id,p.project_name,p.client?.client_name].join(' ').toLowerCase().includes(q))).slice(0,60)
-        .map(p=>`<div class="pick radio" data-id="${p.project_uuid}"><div class="ck"></div><div class="grow"><div style="font-weight:600">${esc(p.project_id?p.project_id+' · ':'')}${esc(p.project_name)}</div><div class="mut small">${esc(p.client?.client_name||'')}</div></div></div>`).join('');
+        .map(p=>`<div class="pick radio" data-id="${p.project_uuid}"><div class="ck"></div><div><div class="ri-num">${esc(p.project_id||'')}</div><div style="font-weight:600;font-size:13px">${esc(p.project_name)}</div><div class="ri-sub">${esc(p.client?.client_name||'')}</div></div></div>`).join('');
       pp.querySelectorAll('.pick').forEach(el=>el.onclick=async()=>{
         pp.innerHTML='<div class="center"><div class="spin d"></div></div>';
         const rs=await getRfps(el.dataset.id);
-        pp.innerHTML=rs.length?rs.map(r=>`<div class="pick" data-r="${r.rfp_uuid}"><div class="ck">✓</div><div class="grow"><div class="mono">${esc(r.rfp_number||'')}</div><div class="small">${esc(r.titulo||'')}</div></div></div>`).join(''):'<div class="empty">Esa obra no tiene RFP aprobadas</div>';
+        pp.innerHTML=rs.length?rs.map(r=>`<div class="pick" data-r="${r.rfp_uuid}"><div class="ck">✓</div><div><div class="ri-num">${esc(r.rfp_number||'')}</div><div class="small">${esc(r.titulo||'')}</div>${saldoHtml(r.rfp_uuid)}</div></div>`).join(''):'<div class="empty">Esa obra no tiene RFP aprobadas</div>';
         pp.querySelectorAll('[data-r]').forEach(x=>x.onclick=()=>{if(!d.split.some(s=>s.rfp_uuid===x.dataset.r)){d.split.push({rfp_uuid:x.dataset.r,pct:0});rebalance(d.split);saveDraft()}closeSheet();done()});
       });};
     o.querySelector('#qq').oninput=debounce(drawP,150);drawP();
@@ -491,92 +593,142 @@ function pickOtherRfp(done){
 
 /* --- Paso 3: partidas --- */
 function entregaOf(it){return it.entrega||S.draft.entrega_default||{tipo:'obra'}}
-function entregaText(e){
-  const p=projById(S.draft.project_uuid);
+function entregaText(e,p){
+  p=p||projById(S.draft?.project_uuid);
   if(!e||e.tipo==='obra')return`<b>${ENTREGA_ICO.obra} Obra</b><span class="mut small"> · ${esc(projAddr(p)||'dirección del proyecto')}</span>`;
   return`<b>${ENTREGA_ICO[e.tipo]} ${e.tipo==='recoger'?'Recoger':'Otra dirección'}</b><span class="mut small"> · ${esc(e.direccion||'sin dirección')}</span>`;
 }
 function step3(){
   const d=S.draft,m=$('#main');
-  m.innerHTML=`${stepsBar(3)}<p class="step-h">¿Qué necesitas?</p><p class="mut small" style="margin:0 0 12px">Paso 3 de 4 · una tarjeta por partida</p>
-  <div class="card"><div class="grid2">
-    <div><label class="f" style="margin-top:0">Fecha requerida (todas)</label><input class="i" type="date" id="fdef" min="${todayISO()}" value="${esc(d.fecha_default)}"></div>
-    <div><label class="f" style="margin-top:0">Entrega (todas)</label><button class="entrega" id="edef" style="margin-top:0;min-height:48px">${ENTREGA_ICO[d.entrega_default.tipo]} <span class="small">${d.entrega_default.tipo==='obra'?'Obra':d.entrega_default.tipo==='recoger'?'Recoger':'Otra dir.'}</span></button></div>
-  </div><p class="mut small" style="margin:8px 0 0">Las partidas nuevas toman estos valores. Puedes cambiar cada una.</p></div>
+  m.innerHTML=`${stepsBar(3)}<p class="step-h">¿Qué necesitas?</p><p class="mut small" style="margin:2px 0 12px;font-family:var(--mono)">Paso 3 de 4 · una tarjeta por partida</p>
+  <div class="dcard"><div class="dcard-bd"><div class="grid2">
+    <div><label class="lbl" style="margin-top:0">Fecha requerida (todas)</label><input class="i" type="date" id="fdef" min="${todayISO()}" value="${esc(d.fecha_default)}"></div>
+    <div><label class="lbl" style="margin-top:0">Entrega (todas)</label><button class="entrega" id="edef" style="margin-top:0">${ENTREGA_ICO[d.entrega_default.tipo]} <span class="small">${d.entrega_default.tipo==='obra'?'Obra':d.entrega_default.tipo==='recoger'?'Recoger':'Otra dir.'}</span></button></div>
+  </div><div class="minirow"><button class="abtn" id="tpl-load">📋 Usar plantilla</button><button class="abtn" id="tpl-save">💾 Guardar como plantilla</button></div></div></div>
   <datalist id="dl-u">${UNIDADES.map(u=>`<option value="${u}">`).join('')}</datalist>
   <div id="items"></div>
-  <button class="btn sec block" id="add">＋ Agregar partida</button>`;
+  <button class="btn-add" id="add">＋ Agregar partida</button>`;
   $('#fdef').onchange=e=>{const old=d.fecha_default;d.fecha_default=e.target.value;d.items.forEach(it=>{if(!it.fecha_requerida||it.fecha_requerida===old)it.fecha_requerida=d.fecha_default});saveDraft();drawItems()};
-  $('#edef').onclick=()=>editEntrega(d.entrega_default,true,e=>{d.entrega_default=e;d.items.forEach(it=>it.entrega=null);saveDraft();step3()});
-  $('#add').onclick=()=>{const last=d.items[d.items.length-1];d.items.push(newItem({fecha_requerida:d.fecha_default||last?.fecha_requerida,entrega:last?.entrega}));saveDraft();drawItems();setTimeout(()=>{const els=document.querySelectorAll('.item');els[els.length-1]?.scrollIntoView({behavior:'smooth',block:'start'});els[els.length-1]?.querySelector('textarea')?.focus()},50)};
+  $('#edef').onclick=()=>editEntrega(d.entrega_default,true,projById(d.project_uuid),e=>{d.entrega_default=e;d.items.forEach(it=>it.entrega=null);saveDraft();step3()});
+  $('#add').onclick=()=>{const last=d.items[d.items.length-1];collapseOthers(null);d.items.push(newItem({fecha_requerida:d.fecha_default||last?.fecha_requerida,entrega:last?.entrega}));saveDraft();drawItems();setTimeout(()=>{const els=document.querySelectorAll('.item');els[els.length-1]?.scrollIntoView({behavior:'smooth',block:'start'});els[els.length-1]?.querySelector('textarea')?.focus()},50)};
+  $('#tpl-load').onclick=loadTemplate;$('#tpl-save').onclick=saveTemplate;
   drawItems();
   setBar(`<button class="btn ghost" id="b2">← Atrás</button><button class="btn" id="n3">Revisar →</button>`);
   $('#b2').onclick=()=>{d.step=2;renderStep()};
   $('#n3').onclick=()=>{
-    const bad=d.items.findIndex(it=>!it.descripcion.trim()||!(Number(String(it.cantidad).replace(',','.'))>0));
-    if(bad>=0){toast(`Partida ${bad+1}: falta descripción o cantidad`,true);document.querySelectorAll('.item')[bad]?.scrollIntoView({behavior:'smooth'});return}
+    d.items=d.items.filter((it,i)=>it.descripcion.trim()||num(it.cantidad)>0||d.items.length===1);
+    const bad=d.items.findIndex(it=>!it.descripcion.trim()||!(num(it.cantidad)>0));
+    if(bad>=0){d.items[bad].open=true;drawItems();toast(`Partida ${bad+1}: falta descripción o cantidad`,'err');document.querySelectorAll('.item')[bad]?.scrollIntoView({behavior:'smooth'});return}
     const badSp=d.items.findIndex(it=>it.split.length&&Math.abs(sumPct(it.split)-100)>0.01);
-    if(badSp>=0){toast(`Partida ${badSp+1}: el split especial no suma 100%`,true);return}
+    if(badSp>=0){toast(`Partida ${badSp+1}: el split especial no suma 100%`,'err');return}
     d.step=4;renderStep();
   };
 }
+const validItem=it=>it.descripcion.trim()&&num(it.cantidad)>0;
+function collapseOthers(keep){S.draft.items.forEach(x=>{if(x!==keep&&validItem(x))x.open=false})}
+function compactHtml(it,i){const e=entregaOf(it);const nf=S.draft.files.filter(f=>f.item===it.id).length;
+  return`<div class="item compact" data-id="${it.id}"><div class="crow"><span class="n">#${i+1}</span><div class="ctext"><div class="d"><b>${fNum(num(it.cantidad))} ${esc(it.unidad)}</b> · ${esc(it.descripcion)}</div>
+  <small>📅 ${it.fecha_requerida?fDate(it.fecha_requerida):'sin fecha'} · ${ENTREGA_ICO[e.tipo]} ${e.tipo==='obra'?'Obra':esc(e.direccion||'')}${nf?' · 📎 '+nf:''}${it.split.length?' · split especial':''}${it.especificacion?' · '+esc(it.especificacion):''}</small></div><span class="mut" style="font-size:18px">›</span></div></div>`}
 function drawItems(){
   const d=S.draft,box=$('#items');
   box.innerHTML=d.items.map((it,i)=>{
-    const files=d.files.filter(f=>f.item===it.id);
-    return`<div class="item" data-id="${it.id}">
-    <div class="row between"><span class="n">Partida ${i+1}</span><div class="row" style="gap:4px">
-      <button class="btn ghost sm" data-a="dup" title="Duplicar">⧉</button>${d.items.length>1?`<button class="btn ghost sm" data-a="del" title="Eliminar" style="color:var(--red)">🗑</button>`:''}</div></div>
-    <label class="f">Descripción *</label><textarea class="i" data-k="descripcion" rows="2" placeholder="Ej. Cemento gris CPC 30R 50 kg">${esc(it.descripcion)}</textarea>
-    <div class="grid2"><div><label class="f">Cantidad *</label><input class="i" data-k="cantidad" inputmode="decimal" value="${esc(it.cantidad)}" placeholder="0"></div>
-      <div><label class="f">Unidad</label><input class="i" data-k="unidad" list="dl-u" value="${esc(it.unidad)}"></div></div>
-    <label class="f">Fecha requerida</label><input class="i" type="date" data-k="fecha_requerida" min="${todayISO()}" value="${esc(it.fecha_requerida)}">
+    if(it.open===false&&validItem(it))return compactHtml(it,i);
+    const files=d.files.filter(f=>f.item===it.id);const more=it.showMore||it.especificacion||it.notas;
+    return`<div class="item" data-id="${it.id}"><div class="item-hd"><span class="n">PARTIDA ${i+1}</span><div class="row" style="gap:4px">
+      ${validItem(it)?'<button class="abtn" data-a="close" title="Listo">✓ Listo</button>':''}<button class="abtn" data-a="dup" title="Duplicar">⧉</button>${d.items.length>1?`<button class="abtn red" data-a="del" title="Eliminar">🗑</button>`:''}</div></div>
+    <div class="item-bd">
+    <label class="lbl">Descripción *</label><div class="ac"><textarea class="i" data-k="descripcion" rows="2" placeholder="Escribe y elige del catálogo, ej. cemento">${esc(it.descripcion)}</textarea></div>
+    <div class="grid2"><div><label class="lbl">Cantidad *</label><input class="i mono" data-k="cantidad" inputmode="decimal" value="${esc(it.cantidad)}" placeholder="0"></div>
+      <div><label class="lbl">Unidad</label><input class="i" data-k="unidad" list="dl-u" value="${esc(it.unidad)}"></div></div>
+    <label class="lbl">Fecha requerida</label><input class="i" type="date" data-k="fecha_requerida" min="${todayISO()}" value="${esc(it.fecha_requerida)}">
     <button class="entrega" data-a="ent">${entregaText(entregaOf(it))}<span style="margin-left:auto" class="mut">›</span></button>
-    ${it.showMore||it.especificacion||it.notas?`<label class="f">Marca / especificación</label><input class="i" data-k="especificacion" value="${esc(it.especificacion)}" placeholder="Opcional">
-      <label class="f">Notas de la partida</label><textarea class="i" data-k="notas" rows="2" placeholder="Opcional">${esc(it.notas)}</textarea>`:''}
-    ${it.split.length?`<div class="warn" style="margin-top:10px"><b>Split especial:</b> ${it.split.map(s=>esc(S.rfpCache[s.rfp_uuid]?.rfp_number||'RFP')+' '+s.pct+'%').join(' · ')}</div>`:''}
+    ${more?`<label class="lbl">Marca / especificación</label><input class="i" data-k="especificacion" value="${esc(it.especificacion)}" placeholder="Opcional">
+      <label class="lbl">Notas de la partida</label><textarea class="i" data-k="notas" rows="2" placeholder="Opcional">${esc(it.notas)}</textarea>`:''}
+    ${it.split.length?`<div class="warn" style="margin-top:9px"><b>Split especial:</b> ${it.split.map(s=>esc(S.rfpCache[s.rfp_uuid]?.rfp_number||'RFP')+' '+s.pct+'%').join(' · ')}</div>`:''}
     <div class="thumbs">${files.map(thumbHtml).join('')}</div>
-    <div class="minirow">
-      <button class="btn sec sm" data-a="cam">📷 Foto</button><button class="btn sec sm" data-a="file">📎 Archivo</button>
-      ${!(it.showMore||it.especificacion||it.notas)?`<button class="btn ghost sm" data-a="more">＋ Marca / notas</button>`:''}
-      <button class="btn ghost sm" data-a="split">${it.split.length?'Editar split':'Split especial'}</button>
+    <div class="minirow"><button class="abtn" data-a="cam">📷 Foto</button><button class="abtn" data-a="file">📎 Archivo</button>
+      ${!more?`<button class="abtn" data-a="more">＋ Marca / notas</button>`:''}<button class="abtn" data-a="split">${it.split.length?'Editar split':'Split especial'}</button></div>
     </div></div>`}).join('');
-  box.querySelectorAll('.item').forEach(card=>{
+  box.querySelectorAll('.item.compact').forEach(card=>card.onclick=()=>{const it=d.items.find(x=>x.id===card.dataset.id);collapseOthers(it);it.open=true;saveDraft();drawItems();setTimeout(()=>document.querySelector(`.item[data-id="${it.id}"]`)?.scrollIntoView({behavior:'smooth',block:'start'}),30)});
+  box.querySelectorAll('.item:not(.compact)').forEach(card=>{
     const it=d.items.find(x=>x.id===card.dataset.id);
     card.querySelectorAll('[data-k]').forEach(inp=>{const ev=inp.type==='date'?'change':'input';inp.addEventListener(ev,()=>{it[inp.dataset.k]=inp.value;saveDraft()})});
+    attachAC(card.querySelector('[data-k=descripcion]'),sel=>{it.descripcion=sel.descripcion;if(sel.unidad){it.unidad=sel.unidad;card.querySelector('[data-k=unidad]').value=sel.unidad}card.querySelector('[data-k=descripcion]').value=sel.descripcion;saveDraft();card.querySelector('[data-k=cantidad]').focus()});
     card.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
       const a=b.dataset.a;
-      if(a==='del'){if(confirmInline(b)){d.items=d.items.filter(x=>x!==it);d.files.filter(f=>f.item===it.id).forEach(f=>{IDB.del(f.id)});d.files=d.files.filter(f=>f.item!==it.id);saveDraft();drawItems()}}
-      if(a==='dup'){const c={...it,id:uid(),split:it.split.map(s=>({...s})),entrega:it.entrega?{...it.entrega}:null};d.items.splice(d.items.indexOf(it)+1,0,c);saveDraft();drawItems()}
-      if(a==='ent')editEntrega(entregaOf(it),false,e=>{it.entrega=e;saveDraft();drawItems()},()=>{it.entrega=null;saveDraft();drawItems()});
+      if(a==='del'){if(confirmInline(b)){d.items=d.items.filter(x=>x!==it);d.files.filter(f=>f.item===it.id).forEach(f=>IDB.del(f.id));d.files=d.files.filter(f=>f.item!==it.id);saveDraft();drawItems()}}
+      if(a==='dup'){collapseOthers(null);const c={...it,open:true,id:uid(),split:it.split.map(s=>({...s})),entrega:it.entrega?{...it.entrega}:null};d.items.splice(d.items.indexOf(it)+1,0,c);saveDraft();drawItems()}
+      if(a==='ent')editEntrega(entregaOf(it),false,projById(d.project_uuid),e=>{it.entrega=e;saveDraft();drawItems()},()=>{it.entrega=null;saveDraft();drawItems()});
       if(a==='more'){it.showMore=true;drawItems()}
+      if(a==='close'){it.open=false;saveDraft();drawItems()}
       if(a==='split')editItemSplit(it);
-      if(a==='cam')pickFiles(it.id,true);
-      if(a==='file')pickFiles(it.id,false);
+      if(a==='cam')pickDraftFiles(it.id,true);
+      if(a==='file')pickDraftFiles(it.id,false);
     });
     bindThumbs(card);
   });
   hydrateThumbs();
 }
-function confirmInline(b){if(b.dataset.c){return true}b.dataset.c='1';b.textContent='¿Eliminar?';b.style.background='var(--red-bg)';setTimeout(()=>{if(b.isConnected){delete b.dataset.c;b.textContent='🗑';b.style.background=''}},2500);return false}
+function confirmInline(b){if(b.dataset.c)return true;b.dataset.c='1';const t=b.textContent;b.textContent='¿Seguro?';setTimeout(()=>{if(b.isConnected){delete b.dataset.c;b.textContent=t}},2500);return false}
 
-function editEntrega(cur,isDefault,onSave,onReset){
-  const p=projById(S.draft.project_uuid);const e={tipo:'obra',...cur};
+/* Autocompletar del catálogo */
+function attachAC(ta,onPick){
+  const wrap=ta.parentElement;let list=null,seq=0;
+  const close=()=>{list&&list.remove();list=null};
+  const run=debounce(async()=>{
+    const q=ta.value.trim();if(q.length<3||document.activeElement!==ta){close();return}
+    const my=++seq;const {data}=await sb.rpc('buscar_material',{q});if(my!==seq||document.activeElement!==ta)return;
+    close();if(!data||!data.length)return;
+    list=document.createElement('div');list.className='ac-list';
+    list.innerHTML=data.map((m,i)=>`<div data-i="${i}">${esc(m.descripcion)}<br><small>${esc(m.unidad||'')} · usado ${m.veces} ${m.veces==1?'vez':'veces'}</small></div>`).join('');
+    list.querySelectorAll('[data-i]').forEach(el=>el.addEventListener('mousedown',e=>{e.preventDefault();const m=data[+el.dataset.i];close();onPick(m)}));
+    wrap.appendChild(list);
+  },280);
+  ta.addEventListener('input',run);ta.addEventListener('blur',()=>setTimeout(close,150));
+}
+
+/* Plantillas */
+async function loadTemplate(){
+  const {data}=await sb.from('requisicion_plantilla').select('*').or(`owner_email.eq.${S.me.email},publica.eq.true`).order('nombre');
+  sheet(`<h3>Plantillas</h3>${(data||[]).length?data.map(t=>`<div class="pick" data-id="${t.id}"><div style="flex:1"><div style="font-weight:600">${esc(t.nombre)}</div><div class="ri-sub">${t.items.length} partidas${t.publica?' · compartida':''}${t.owner_email!==S.me.email?' · de '+esc(t.owner_email):''}</div></div>${t.owner_email===S.me.email?`<button class="abtn red" data-del="${t.id}">🗑</button>`:''}</div>`).join(''):'<div class="empty">Aún no hay plantillas.\nArma tus partidas y toca “Guardar como plantilla”.</div>'}`,o=>{
+    o.querySelectorAll('[data-del]').forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!confirmInline(b))return;await sb.from('requisicion_plantilla').delete().eq('id',b.dataset.del);closeSheet();loadTemplate()});
+    o.querySelectorAll('.pick').forEach(el=>el.onclick=()=>{
+      const t=data.find(x=>x.id===el.dataset.id),d=S.draft;
+      const empty=d.items.length===1&&!d.items[0].descripcion.trim();if(empty)d.items=[];
+      t.items.forEach(x=>{const n=newItem({...x,fecha_requerida:d.fecha_default});n.open=false;d.items.push(n)});
+      saveDraft();closeSheet();drawItems();toast(`${t.items.length} partidas agregadas`,'ok');
+    });
+  });
+}
+function saveTemplate(){
+  const its=S.draft.items.filter(it=>it.descripcion.trim());
+  if(!its.length)return toast('Primero agrega partidas','err');
+  sheet(`<h3>Guardar como plantilla</h3><label class="lbl">Nombre</label><input class="i" id="tn" placeholder="Ej. Kit de colado">
+   <label class="sw" style="margin-top:10px"><span class="small">Compartir con todos los residentes</span><input type="checkbox" id="tp" style="accent-color:var(--acc)"></label>
+   <button class="btn block" id="ts" style="margin-top:12px">Guardar (${its.length} partidas)</button>`,o=>{
+    o.querySelector('#ts').onclick=async()=>{const n=o.querySelector('#tn').value.trim();if(!n)return toast('Ponle nombre','err');
+      const {error}=await sb.from('requisicion_plantilla').insert({nombre:n,owner_email:S.me.email,publica:o.querySelector('#tp').checked,items:its.map(it=>({descripcion:it.descripcion,cantidad:it.cantidad,unidad:it.unidad,especificacion:it.especificacion}))});
+      if(error)return toast(error.message,'err');closeSheet();toast('Plantilla guardada','ok')};
+  });
+}
+
+function editEntrega(cur,isDefault,p,onSave,onReset){
+  const e={tipo:'obra',...cur};
   sheet(`<h3>Lugar de entrega${isDefault?' (todas las partidas)':''}</h3>
-    ${['obra','otra_direccion','recoger'].map(t=>`<div class="pick radio ${e.tipo===t?'on':''}" data-t="${t}"><div class="ck"></div><div class="grow"><div style="font-weight:600">${ENTREGA_ICO[t]} ${ENTREGA_LBL[t]}</div>${t==='obra'?`<div class="mut small">${esc(projAddr(p)||'Dirección del proyecto')}</div>`:''}</div></div>`).join('')}
+    ${['obra','otra_direccion','recoger'].map(t=>`<div class="pick radio ${e.tipo===t?'on':''}" data-t="${t}"><div class="ck"></div><div><div style="font-weight:600">${ENTREGA_ICO[t]} ${ENTREGA_LBL[t]}</div>${t==='obra'?`<div class="ri-sub">${esc(projAddr(p)||'Dirección del proyecto')}</div>`:''}</div></div>`).join('')}
     <div id="ef"></div>
-    <div class="row" style="margin-top:14px">${onReset&&!isDefault?'<button class="btn ghost" id="er">Usar el general</button>':''}<button class="btn grow" id="es">Guardar</button></div>`,o=>{
+    <div class="row" style="margin-top:12px">${onReset&&!isDefault?'<button class="btn ghost" id="er">Usar el general</button>':''}<button class="btn" style="flex:1" id="es">Guardar</button></div>`,o=>{
     const ef=o.querySelector('#ef');
     const drawF=()=>{ef.innerHTML=e.tipo==='obra'?'':`
-      <label class="f">${e.tipo==='recoger'?'¿Dónde se recoge? (sucursal, bodega, dirección)':'Dirección de entrega'} *</label><textarea class="i" id="e-dir" rows="2">${esc(e.direccion||'')}</textarea>
-      <div class="grid2"><div><label class="f">${e.tipo==='recoger'?'Quién recoge':'Quién recibe'}</label><input class="i" id="e-con" value="${esc(e.contacto||'')}"></div>
-      <div><label class="f">Teléfono</label><input class="i" id="e-tel" inputmode="tel" value="${esc(e.telefono||'')}"></div></div>
-      <label class="f">${e.tipo==='recoger'?'Horario / referencia':'Referencias'}</label><input class="i" id="e-not" value="${esc(e.notas||'')}">`};
+      <label class="lbl">${e.tipo==='recoger'?'¿Dónde se recoge? (sucursal, bodega, dirección)':'Dirección de entrega'} *</label><textarea class="i" id="e-dir" rows="2">${esc(e.direccion||'')}</textarea>
+      <div class="grid2"><div><label class="lbl">${e.tipo==='recoger'?'Quién recoge':'Quién recibe'}</label><input class="i" id="e-con" value="${esc(e.contacto||'')}"></div>
+      <div><label class="lbl">Teléfono</label><input class="i mono" id="e-tel" inputmode="tel" value="${esc(e.telefono||'')}"></div></div>
+      <label class="lbl">${e.tipo==='recoger'?'Horario / referencia':'Referencias'}</label><input class="i" id="e-not" value="${esc(e.notas||'')}">`};
     o.querySelectorAll('[data-t]').forEach(x=>x.onclick=()=>{e.tipo=x.dataset.t;o.querySelectorAll('[data-t]').forEach(y=>y.classList.toggle('on',y===x));drawF()});
     drawF();
     o.querySelector('#es').onclick=()=>{
       if(e.tipo!=='obra'){e.direccion=o.querySelector('#e-dir').value.trim();e.contacto=o.querySelector('#e-con').value.trim();e.telefono=o.querySelector('#e-tel').value.trim();e.notas=o.querySelector('#e-not').value.trim();
-        if(!e.direccion){toast('Escribe la dirección',true);return}}
+        if(!e.direccion){toast('Escribe la dirección','err');return}}
       else{delete e.direccion;delete e.contacto;delete e.telefono;delete e.notas}
       closeSheet();onSave({...e});
     };
@@ -585,190 +737,267 @@ function editEntrega(cur,isDefault,onSave,onReset){
 }
 function editItemSplit(it){
   const d=S.draft;const sp=it.split.length?it.split.map(s=>({...s})):d.split.map(s=>({...s}));
-  const draw=o=>{const sum=sumPct(sp);o.querySelector('#isp').innerHTML=d.split.map(g=>{const s=sp.find(x=>x.rfp_uuid===g.rfp_uuid);return`<div class="row" style="margin-bottom:8px"><div class="grow"><div class="mono small">${esc(S.rfpCache[g.rfp_uuid]?.rfp_number||'RFP')}</div><div class="mut small">${esc(S.rfpCache[g.rfp_uuid]?.titulo||'')}</div></div><input class="i pctin" inputmode="decimal" data-r="${g.rfp_uuid}" value="${s?s.pct:0}"><span>%</span></div>`}).join('')+`<div class="${Math.abs(sum-100)<0.01?'sum-ok':'sum-bad'}" style="text-align:right">Suma: ${sum}%</div>`;
-    o.querySelectorAll('[data-r]').forEach(inp=>inp.onchange=()=>{const v=Number(inp.value.replace(',','.'))||0;const i=sp.findIndex(x=>x.rfp_uuid===inp.dataset.r);if(i>=0)sp[i].pct=v;else sp.push({rfp_uuid:inp.dataset.r,pct:v});draw(o)})};
-  sheet(`<h3>Split especial de esta partida</h3><p class="mut small" style="margin-top:-6px">Pon 0% en las RFP que no apliquen. Para usar otras RFP, agrégalas primero en el paso 2.</p><div id="isp"></div>
-    <div class="row" style="margin-top:12px">${it.split.length?'<button class="btn danger" id="sx">Quitar split</button>':''}<button class="btn grow" id="ss">Guardar</button></div>`,o=>{
+  const draw=o=>{const sum=sumPct(sp);o.querySelector('#isp').innerHTML=d.split.map(g=>{const s=sp.find(x=>x.rfp_uuid===g.rfp_uuid);return`<div class="row" style="margin-bottom:8px"><div style="flex:1"><div class="ri-num">${esc(S.rfpCache[g.rfp_uuid]?.rfp_number||'RFP')}</div><div class="ri-sub">${esc(S.rfpCache[g.rfp_uuid]?.titulo||'')}</div></div><input class="i pctin" inputmode="decimal" data-r="${g.rfp_uuid}" value="${s?s.pct:0}"><span class="mut">%</span></div>`}).join('')+`<div class="${Math.abs(sum-100)<0.01?'sum-ok':'sum-bad'} mono" style="text-align:right">Suma: ${sum}%</div>`;
+    o.querySelectorAll('[data-r]').forEach(inp=>inp.onchange=()=>{const v=num(inp.value);const i=sp.findIndex(x=>x.rfp_uuid===inp.dataset.r);if(i>=0)sp[i].pct=v;else sp.push({rfp_uuid:inp.dataset.r,pct:v});draw(o)})};
+  sheet(`<h3>Split especial de esta partida</h3><p class="mut small" style="margin:-4px 0 10px">Pon 0% en las RFP que no apliquen. Para otras RFP, agrégalas en el paso 2.</p><div id="isp"></div>
+    <div class="row" style="margin-top:12px">${it.split.length?'<button class="btn red" id="sx">Quitar</button>':''}<button class="btn" style="flex:1" id="ss">Guardar</button></div>`,o=>{
     draw(o);
-    o.querySelector('#ss').onclick=()=>{const clean=sp.filter(s=>s.pct>0);if(Math.abs(sumPct(clean)-100)>0.01){toast('Debe sumar 100%',true);return}it.split=clean;saveDraft();closeSheet();drawItems()};
+    o.querySelector('#ss').onclick=()=>{const clean=sp.filter(s=>s.pct>0);if(Math.abs(sumPct(clean)-100)>0.01){toast('Debe sumar 100%','err');return}it.split=clean;saveDraft();closeSheet();drawItems()};
     const x=o.querySelector('#sx');if(x)x.onclick=()=>{it.split=[];saveDraft();closeSheet();drawItems()};
   });
 }
 
-/* --- Archivos --- */
+/* --- Archivos del borrador --- */
 function thumbHtml(f){return`<div class="thumb" data-f="${f.id}">${f.mime==='application/pdf'?`<div><div class="pdf">📄</div>${esc(fBytes(f.size))}</div>`:''}<button class="x" data-x="${f.id}">✕</button></div>`}
-function bindThumbs(root){root.querySelectorAll('[data-x]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const d=S.draft;await IDB.del(b.dataset.x);d.files=d.files.filter(f=>f.id!==b.dataset.x);saveDraft();b.parentElement.remove()})}
-async function hydrateThumbs(){for(const el of document.querySelectorAll('.thumb[data-f]')){const f=S.draft.files.find(x=>x.id===el.dataset.f);if(f&&f.mime.startsWith('image/')){const b=await IDB.get(f.id);if(b)el.style.backgroundImage=`url(${URL.createObjectURL(b)})`}}}
-function pickFiles(itemId,camera){
-  const inp=document.createElement('input');inp.type='file';
-  inp.accept=camera?'image/*':'image/*,application/pdf';if(camera)inp.capture='environment';else inp.multiple=true;
-  inp.onchange=async()=>{
-    for(const file of inp.files){
-      const t=document.createElement('div');t.className='toast';t.textContent='Procesando '+file.name+'…';document.body.appendChild(t);
-      try{
-        const r=await processFile(file,(p,n)=>t.textContent=`Comprimiendo PDF ${p}/${n}…`);
-        const id=uid();await IDB.put(id,r.blob);
-        S.draft.files.push({id,item:itemId,name:r.name,mime:r.mime,size:r.blob.size,orig:file.size});saveDraft();
-        if(r.blob.size<file.size*0.9)toast(`${fBytes(file.size)} → ${fBytes(r.blob.size)}`);
-      }catch(e){toast(e.message,true)}
-      t.remove();
-    }
-    S.draft.step===3?drawItems():step4();
-  };
-  inp.click();
+function bindThumbs(root){root.querySelectorAll('[data-x]').forEach(b=>b.onclick=async e=>{e.stopPropagation();await IDB.del(b.dataset.x);S.draft.files=S.draft.files.filter(f=>f.id!==b.dataset.x);saveDraft();b.parentElement.remove()})}
+async function hydrateThumbs(){for(const el of document.querySelectorAll('.thumb[data-f]')){const f=S.draft?.files.find(x=>x.id===el.dataset.f);if(f&&f.mime.startsWith('image/')){const b=await IDB.get(f.id);if(b)el.style.backgroundImage=`url(${URL.createObjectURL(b)})`}}}
+async function pickDraftFiles(itemId,camera){
+  const files=await pickRaw(camera,true);
+  for(const file of files){
+    const t=document.createElement('div');t.className='toast';t.textContent='Procesando '+file.name+'…';document.body.appendChild(t);
+    try{const r=await processFile(file,(p,n)=>t.textContent=`Comprimiendo PDF ${p}/${n}…`);
+      const id=uid();await IDB.put(id,r.blob);
+      S.draft.files.push({id,item:itemId,name:r.name,mime:r.mime,size:r.blob.size});saveDraft();
+      if(r.blob.size<file.size*0.9)toast(`${fBytes(file.size)} → ${fBytes(r.blob.size)}`);
+    }catch(e){toast(e.message,'err')}
+    t.remove();
+  }
+  S.draft.step===3?drawItems():step4();
 }
 
-/* --- Paso 4: resumen y envío --- */
+/* --- Paso 4 --- */
 function step4(){
   const d=S.draft,m=$('#main'),p=projById(d.project_uuid);
   const gen=d.files.filter(f=>!f.item);
-  m.innerHTML=`${stepsBar(4)}<p class="step-h">Revisa y envía</p><p class="mut small" style="margin:0 0 12px">Paso 4 de 4</p>
-  <div class="card"><dl class="kv"><dt>Obra</dt><dd><b>${esc(p?.project_id?p.project_id+' · ':'')}${esc(p?.project_name||'')}</b></dd>
-   <dt>RFP</dt><dd>${d.split.map(s=>`<span class="mono small">${esc(S.rfpCache[s.rfp_uuid]?.rfp_number||'RFP')}</span> ${s.pct}%`).join('<br>')}</dd>
-   <dt>Partidas</dt><dd>${d.items.length}</dd></dl></div>
-  <p class="sec-title">Partidas</p>
-  ${d.items.map((it,i)=>{const e=entregaOf(it);const nf=d.files.filter(f=>f.item===it.id).length;return`<div class="card" style="padding:12px">
-    <div class="row between"><span class="n mono small mut">#${i+1}</span><b>${fNum(String(it.cantidad).replace(',','.'))} ${esc(it.unidad)}</b></div>
-    <div style="margin-top:4px">${esc(it.descripcion)}</div>${it.especificacion?`<div class="mut small">${esc(it.especificacion)}</div>`:''}
-    <div class="mut small" style="margin-top:6px">📅 ${fDate(it.fecha_requerida)} · ${ENTREGA_ICO[e.tipo]} ${e.tipo==='obra'?'Obra':esc(e.direccion||'')}${nf?' · 📎 '+nf:''}${it.split.length?' · split especial':''}</div></div>`}).join('')}
-  <p class="sec-title">Notas generales</p>
-  <textarea class="i" id="notas" rows="3" placeholder="Algo que compras deba saber (opcional)">${esc(d.notas)}</textarea>
-  <p class="sec-title">Adjuntos generales (cotización, fotos)</p>
+  m.innerHTML=`${stepsBar(4)}<p class="step-h">Revisa y envía</p><p class="mut small" style="margin:2px 0 12px;font-family:var(--mono)">Paso 4 de 4</p>
+  <div class="dcard"><div class="dcard-hd"><div><div class="dnum">${esc(p?.project_id||'')}</div><div class="dtit">${esc(p?.project_name||'')}</div><div class="dsub">${esc(p?.client?.client_name||'')}</div></div></div>
+   <div class="dcard-bd"><dl class="kv"><dt>RFP</dt><dd>${d.split.map(s=>`<span class="mono small">${esc(S.rfpCache[s.rfp_uuid]?.rfp_number||'RFP')}</span> ${s.pct}%`).join('<br>')}</dd><dt>Partidas</dt><dd>${d.items.length}</dd></dl></div></div>
+  <label class="sw"><span><b style="color:var(--red)">🔴 Urgente</b><br><span class="mut small">Compras la verá hasta arriba y marcada en rojo</span></span><input type="checkbox" id="urg" ${d.urgente?'checked':''}></label>
+  <p class="stitle">Partidas</p>
+  ${d.items.map((it,i)=>{const e=entregaOf(it);const nf=d.files.filter(f=>f.item===it.id).length;return`<div class="dcard"><div class="dcard-bd" style="padding:10px 12px">
+    <div class="row between"><span class="n">#${i+1}</span><b class="mono">${fNum(num(it.cantidad))} ${esc(it.unidad)}</b></div>
+    <div style="margin-top:3px;font-weight:500">${esc(it.descripcion)}</div>${it.especificacion?`<div class="ri-sub">${esc(it.especificacion)}</div>`:''}
+    <div class="ri-sub" style="margin-top:5px">📅 ${fDate(it.fecha_requerida)} · ${ENTREGA_ICO[e.tipo]} ${e.tipo==='obra'?'Obra':esc(e.direccion||'')}${nf?' · 📎 '+nf:''}${it.split.length?' · split especial':''}</div></div></div>`}).join('')}
+  <p class="stitle">Notas generales</p>
+  <textarea class="i" id="notas" rows="3" placeholder="Algo que Compras deba saber (opcional)">${esc(d.notas)}</textarea>
+  <p class="stitle">Adjuntos generales (cotización, fotos)</p>
   <div class="thumbs" style="margin-top:0">${gen.map(thumbHtml).join('')}</div>
-  <div class="minirow"><button class="btn sec sm" id="gcam">📷 Foto</button><button class="btn sec sm" id="gfile">📎 Archivo / PDF</button></div>`;
+  <div class="minirow"><button class="abtn" id="gcam">📷 Foto</button><button class="abtn" id="gfile">📎 Archivo / PDF</button></div>`;
   $('#notas').oninput=e=>{d.notas=e.target.value;saveDraft()};
-  $('#gcam').onclick=()=>pickFiles(null,true);$('#gfile').onclick=()=>pickFiles(null,false);
+  $('#urg').onchange=e=>{d.urgente=e.target.checked;saveDraft()};
+  $('#gcam').onclick=()=>pickDraftFiles(null,true);$('#gfile').onclick=()=>pickDraftFiles(null,false);
   bindThumbs(m);hydrateThumbs();
   setBar(`<button class="btn ghost" id="b3">← Editar</button><button class="btn" id="send">Enviar requisición</button>`);
-  $('#b3').onclick=()=>{d.step=3;renderStep()};
-  $('#send').onclick=submit;
+  $('#b3').onclick=()=>{d.step=3;renderStep()};$('#send').onclick=submit;
 }
-
 async function submit(){
   const d=S.draft,btn=$('#send');btn.disabled=true;btn.innerHTML='<div class="spin"></div> Enviando…';
   try{
-    const items=d.items.map(it=>{const e=entregaOf(it);return{
-      descripcion:it.descripcion.trim(),cantidad:Number(String(it.cantidad).replace(',','.')),unidad:it.unidad,especificacion:it.especificacion,notas:it.notas,
-      fecha_requerida:it.fecha_requerida||d.fecha_default||'',entrega_tipo:e.tipo,entrega_direccion:e.direccion||'',entrega_contacto:e.contacto||'',
-      entrega_telefono:e.telefono||'',entrega_notas:e.notas||'',split:it.split}});
+    const items=d.items.map(it=>{const e=entregaOf(it);return{descripcion:it.descripcion.trim(),cantidad:num(it.cantidad),unidad:it.unidad,especificacion:it.especificacion,notas:it.notas,
+      fecha_requerida:it.fecha_requerida||d.fecha_default||'',entrega_tipo:e.tipo,entrega_direccion:e.direccion||'',entrega_contacto:e.contacto||'',entrega_telefono:e.telefono||'',entrega_notas:e.notas||'',split:it.split}});
     const payload={client_ref:d.client_ref,project_uuid:d.project_uuid,solicitante_email:S.me.email,solicitante_nombre:S.me.nombre||S.me.email,
       resident_id:S.me.resident_id||'',notas:d.notas,fecha_requerida_default:d.fecha_default||'',split:d.split,items};
     let res=d.result;
     if(!res){const {data,error}=await sb.rpc('crear_requisicion',{p:payload});if(error)throw error;res=data;d.result=res;saveDraft()}
-    // subir adjuntos
+    if(d.urgente&&!d.urgDone){await sb.from('requisicion').update({urgente:true}).eq('req_uuid',res.req_uuid);d.urgDone=true;saveDraft()}
     const pend=d.files.filter(f=>!f.done);let i=0;
     for(const f of pend){
-      i++;btn.innerHTML=`<div class="spin"></div> Subiendo archivo ${i}/${pend.length}…`;
+      i++;btn.innerHTML=`<div class="spin"></div> Subiendo ${i}/${pend.length}…`;
       const blob=await IDB.get(f.id);if(!blob){f.done=true;continue}
       const partida=f.item?d.items.findIndex(x=>x.id===f.item)+1:0;
       const item_uuid=partida?res.items.find(x=>x.partida===partida)?.item_uuid:null;
-      const safe=f.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w.\-]+/g,'_').slice(-80);
-      const path=`${res.folio}/${partida?'p'+partida:'general'}/${Date.now()}_${safe}`;
-      const up=await sb.storage.from(BUCKET).upload(path,blob,{contentType:f.mime,upsert:false});
-      if(up.error)throw new Error('No se pudo subir '+f.name+': '+up.error.message);
-      const url=sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+      const {path,url}=await uploadBlob(res.folio,partida,{blob,name:f.name,mime:f.mime});
       const ins=await sb.from('requisicion_adjunto').insert({req_uuid:res.req_uuid,item_uuid,path,url,nombre:f.name,mime:f.mime,bytes:f.size,subido_por:S.me.email});
-      if(ins.error)throw ins.error;
-      f.done=true;saveDraft();
+      if(ins.error)throw ins.error;f.done=true;saveDraft();
     }
-    const folio=res.folio,req=res.req_uuid;
-    await clearDraft();
-    setBar('');
-    $('#main').innerHTML=`<div class="card" style="text-align:center;padding:30px 18px;margin-top:20px">
-      <div style="font-size:46px">✅</div><h2 style="margin:6px 0">Requisición enviada</h2>
-      <p class="mut" style="margin:0 0 10px">Tu folio es</p><div class="folio-big">${esc(folio)}</div>
-      <p class="mut small" style="margin-top:14px">Compras ya la puede ver. El estatus se actualiza solo.</p>
+    const folio=res.folio,req=res.req_uuid;S.myStatus[req]={req_uuid:req,folio,estatus:'Pendiente'};
+    await clearDraft();setBar('');
+    $('#main').innerHTML=`<div class="dcard" style="margin-top:16px"><div class="fhd">✓ Requisición enviada</div><div class="dcard-bd" style="text-align:center;padding:24px 16px">
+      <p class="mut small">Tu folio es</p><div class="folio-big" style="margin:4px 0 10px">${esc(folio)}</div>
+      <p class="mut small">Compras ya la puede ver. El estatus se actualiza solo y te avisamos cuando cambie.</p>
       <button class="btn block" style="margin-top:16px" onclick="location.hash='req/${req}'">Ver estatus</button>
-      <button class="btn ghost block" style="margin-top:10px" onclick="location.hash=''">Ir al inicio</button></div>`;
+      <button class="btn ghost block" style="margin-top:8px" onclick="location.hash=''">Ir al inicio</button></div></div>`;
     history.replaceState(null,'','#enviada');
   }catch(e){
     console.error(e);btn.disabled=false;btn.textContent='Reintentar envío';
-    const msg=(e.message||'').includes('Failed to fetch')?'Sin conexión. Tu borrador está guardado; reintenta cuando tengas señal.':e.message;
-    toast(msg,true);
+    const net=!navigator.onLine||(e.message||'').includes('Failed to fetch')||(e.message||'').includes('NetworkError');
+    if(net){d.pendingSend=true;saveDraft();netState()}
+    toast(net?'Sin conexión. Se enviará solo cuando regrese la señal.':e.message,'err');
   }
 }
 
 /* ================= DETALLE ================= */
 async function viewDetail(id){
-  setHeader('Requisición',true);setBar('');
-  const m=$('#main');m.innerHTML='<div class="center"><div class="spin d"></div></div>';
+  setHeader('Requisición','',true);setBar('');
+  $('#main').innerHTML='<div class="center"><div class="spin d"></div></div>';
   await loadDetail(id);
-  const reload=debounce(()=>loadDetail(id),400);
+  const reload=debounce(()=>{if(!$('#ov'))loadDetail(id)},400);
   S.channel=sb.channel('req-'+id)
     .on('postgres_changes',{event:'*',schema:'ops',table:'requisicion_item',filter:`req_uuid=eq.${id}`},reload)
     .on('postgres_changes',{event:'*',schema:'ops',table:'requisicion',filter:`req_uuid=eq.${id}`},reload)
     .on('postgres_changes',{event:'INSERT',schema:'ops',table:'requisicion_evento',filter:`req_uuid=eq.${id}`},reload)
     .subscribe();
 }
+let DET=null;
 async function loadDetail(id){
   const m=$('#main');
   const [r,it,sp,ad,ev]=await Promise.all([
-    sb.from('v_requisicion').select('*').eq('req_uuid',id).maybeSingle(),
+    sb.from('v_req').select('*').eq('req_uuid',id).maybeSingle(),
     sb.from('requisicion_item').select('*,links:oc_requisicion_item(cantidad,oc:oc_uuid(oc_number,status))').eq('req_uuid',id).order('partida'),
-    sb.from('requisicion_rfp').select('pct,rfp:rfp_uuid(rfp_number,titulo)').eq('req_uuid',id),
+    sb.from('requisicion_rfp').select('pct,rfp_uuid,rfp:rfp_uuid(rfp_number,titulo)').eq('req_uuid',id),
     sb.from('requisicion_adjunto').select('*').eq('req_uuid',id).order('created_at'),
     sb.from('requisicion_evento').select('*').eq('req_uuid',id).order('created_at',{ascending:false}).limit(100)
   ]);
-  const ids=(it.data||[]).filter(x=>x.split_especial).map(x=>x.item_uuid);
-  const isp=ids.length?await sb.from('requisicion_item_rfp').select('item_uuid,pct,rfp:rfp_uuid(rfp_number)').in('item_uuid',ids):{data:[]};
   if(location.hash.slice(1)!=='req/'+id)return;
   if(r.error||!r.data){m.innerHTML='<div class="empty">No se encontró la requisición.</div>';return}
-  const q=r.data;setHeader(q.folio,true);
-  const items=it.data||[],adj=ad.data||[];
-  const ispl=isp.data||[];
+  const q=r.data,items=it.data||[],adj=ad.data||[];
+  const ids=items.filter(x=>x.split_especial).map(x=>x.item_uuid);
+  const isp=ids.length?(await sb.from('requisicion_item_rfp').select('item_uuid,pct,rfp_uuid,rfp:rfp_uuid(rfp_number)').in('item_uuid',ids)).data||[]:[];
+  DET={q,items,split:sp.data||[],adj,isp};
+  const mine=q.solicitante_email===S.me.email;
+  const editable=mine&&q.estatus!=='Cancelada';
   const addr=[q.project_address,q.project_city_state].filter(Boolean).join(', ');
-  const adjH=list=>list.length?`<div class="thumbs">${list.map(a=>a.mime&&a.mime.startsWith('image/')?`<a class="thumb" href="${esc(a.url)}" target="_blank" style="background-image:url('${esc(a.url)}')"></a>`:`<a class="thumb" href="${esc(a.url)}" target="_blank"><div><div class="pdf">📄</div>${esc((a.nombre||'').slice(0,14))}</div></a>`).join('')}</div>`:'';
-  m.innerHTML=`<div class="card">
-    <div class="row between"><span class="folio-big" style="font-size:20px">${esc(q.folio)}</span>${chip(q.estatus)}</div>
-    <div style="font-weight:600;margin-top:8px">${esc(q.project_id?q.project_id+' · ':'')}${esc(q.project_name)}</div>
-    <div class="mut small">${esc(q.client_name||'')}</div>
-    <div class="mut small" style="margin-top:6px">Pidió ${esc(q.solicitante_nombre||q.solicitante_email)} · ${fDT(q.created_at)}</div>
-    <div class="row between small" style="margin-top:12px"><span>Con orden de compra</span><b>${q.pct_oc>=100?'✅ 100%':Math.round(q.pct_oc)+'%'}</b></div><div class="prog"><div style="width:${Math.min(100,q.pct_oc)}%"></div></div>
-    <div class="row between small" style="margin-top:10px"><span>Pagado</span><b>${Math.round(q.pct_pagado)}%</b></div><div class="prog g"><div style="width:${Math.min(100,q.pct_pagado)}%"></div></div>
-    <div style="margin-top:10px"><span class="live">Se actualiza en vivo</span></div>
+  setHeader(q.folio,(q.project_id||'')+' · '+(q.project_name||''),true);
+  const adjH=list=>list.length?`<div class="thumbs">${list.map(a=>a.mime&&a.mime.startsWith('image/')?`<a class="thumb" href="${esc(a.url)}" target="_blank" style="background-image:url('${esc(a.url)}')"></a>`:`<a class="thumb" href="${esc(a.url)}" target="_blank"><div><div class="pdf">📄</div>${esc((a.nombre||'').slice(0,12))}</div></a>`).join('')}</div>`:'';
+  m.innerHTML=`<div class="dcard">
+    <div class="dcard-hd"><div style="min-width:0"><div class="dnum">${esc(q.folio)}</div><div class="dtit">${esc(q.project_name)}</div><div class="dsub">${esc(q.client_name||'')} · Pidió ${esc(q.solicitante_nombre||q.solicitante_email)} · ${fDT(q.created_at)}</div></div>
+      <div style="text-align:right;flex:none">${chip(q.estatus)}${q.urgente?'<div style="margin-top:4px"><span class="bdg b-urg">Urgente</span></div>':''}</div></div>
+    <div class="amounts"><div class="ait"><div class="albl">Con OC</div><div class="aval">${q.pct_oc>=100?'✅100%':Math.round(q.pct_oc)+'%'}</div><div class="prog"><div style="width:${Math.min(100,q.pct_oc)}%"></div></div></div>
+      <div class="ait"><div class="albl">Pagado</div><div class="aval">${Math.round(q.pct_pagado)}%</div><div class="prog g"><div style="width:${Math.min(100,q.pct_pagado)}%"></div></div></div>
+      <div class="ait"><div class="albl">Recibido</div><div class="aval">${Math.round((q.pct_recibido||0))}%</div><div class="prog v"><div style="width:${Math.min(100,(q.pct_recibido||0))}%"></div></div></div></div>
+    <div class="dcard-bd" style="border-top:1px solid var(--bdr)"><div class="row between"><span class="live">Se actualiza en vivo</span>${q.asignado_a?`<span class="ri-sub">Atiende: <b>${esc(q.asignado_a)}</b></span>`:''}</div>
+      <div class="minirow">${editable?'<button class="abtn" id="d-add">＋ Partida</button>':''}<button class="abtn" id="d-adj">📎 Adjuntar</button><button class="abtn" id="d-rep">⟳ Repetir</button>${editable&&items.some(x=>x.estatus==='Pendiente')?'<button class="abtn red" id="d-can">Cancelar</button>':''}</div></div>
   </div>
-  <div class="card"><div class="small mut" style="margin-bottom:4px">RFP / split</div>${(sp.data||[]).map(s=>`<div class="row between small"><span class="mono">${esc(s.rfp?.rfp_number||'')}</span><b>${s.pct}%</b></div>`).join('')}
-   ${q.notas?`<div class="small mut" style="margin-top:10px">Notas</div><div class="small" style="white-space:pre-wrap">${esc(q.notas)}</div>`:''}
-   ${adjH(adj.filter(a=>!a.item_uuid))}</div>
-  <p class="sec-title">Partidas (${items.length})</p>
-  ${items.map(x=>{const links=(x.links||[]);const s=ispl.filter(y=>y.item_uuid===x.item_uuid);return`<div class="card" style="padding:12px">
-    <div class="row between"><span class="mono small mut">#${x.partida}</span>${chip(x.estatus)}</div>
-    <div style="margin-top:4px;font-weight:500">${esc(x.descripcion)}</div>
-    ${x.especificacion?`<div class="mut small">${esc(x.especificacion)}</div>`:''}
-    <div class="row between small" style="margin-top:6px"><span><b>${fNum(x.cantidad)}</b> ${esc(x.unidad||'')}</span>${x.cantidad_con_oc>0?`<span class="mut">${fNum(Math.min(x.cantidad_con_oc,x.cantidad))}/${fNum(x.cantidad)} con OC</span>`:''}</div>
-    <div class="mut small" style="margin-top:4px">📅 ${fDate(x.fecha_requerida)} · ${ENTREGA_ICO[x.entrega_tipo]} ${x.entrega_tipo==='obra'?esc(addr||'Obra'):esc(x.entrega_direccion||'')}${x.entrega_contacto?' · '+esc(x.entrega_contacto):''}${x.entrega_telefono?' · '+esc(x.entrega_telefono):''}</div>
-    ${s.length?`<div class="small" style="margin-top:4px">Split: ${s.map(y=>esc(y.rfp?.rfp_number||'')+' '+y.pct+'%').join(' · ')}</div>`:''}
-    ${links.length?`<div class="small" style="margin-top:6px">${links.map(l=>`<span class="chip st-En-pago mono">${esc(l.oc?.oc_number||'OC')} · ${esc(l.oc?.status||'')}</span>`).join(' ')}</div>`:''}
-    ${x.tomado_por&&x.estatus!=='Pendiente'?`<div class="mut small" style="margin-top:4px">La atiende: ${esc(x.tomado_por)}</div>`:''}
+  <div class="dcard"><div class="dcard-bd"><dl class="kv"><dt>RFP</dt><dd>${DET.split.map(s=>`<span class="mono small">${esc(s.rfp?.rfp_number||'')}</span> <b>${s.pct}%</b>`).join('<br>')}</dd>
+   ${q.notas?`<dt>Notas</dt><dd style="white-space:pre-wrap">${esc(q.notas)}</dd>`:''}<dt>Obra</dt><dd class="small">${esc(addr||'—')}</dd></dl>${adjH(adj.filter(a=>!a.item_uuid))}</div></div>
+  <p class="stitle">Partidas (${items.length})</p>
+  ${items.map(x=>{const links=x.links||[];const s=isp.filter(y=>y.item_uuid===x.item_uuid);const canRecv=!x.cancelado&&(x.cantidad_con_oc>0||['En pago','Pagado'].includes(x.estatus))&&(x.cantidad_recibida||0)<x.cantidad;const canEdit=editable&&x.estatus==='Pendiente';return`<div class="item">
+    <div class="item-hd"><span class="n">#${x.partida}</span>${chip(x.estatus)}</div><div class="item-bd" style="padding-top:8px">
+    <div style="font-weight:600">${esc(x.descripcion)}</div>${x.especificacion?`<div class="ri-sub">${esc(x.especificacion)}</div>`:''}${x.notas?`<div class="ri-sub">📝 ${esc(x.notas)}</div>`:''}
+    ${stepper(x)}
+    <div class="row between small" style="margin-top:6px"><span class="mono"><b>${fNum(x.cantidad)}</b> ${esc(x.unidad||'')}</span><span class="mut mono">${x.cantidad_con_oc>0?fNum(Math.min(x.cantidad_con_oc,x.cantidad))+'/'+fNum(x.cantidad)+' OC':''}${x.cantidad_recibida>0?' · '+fNum(x.cantidad_recibida)+' recib.':''}</span></div>
+    <div class="ri-sub" style="margin-top:4px">📅 ${fDate(x.fecha_requerida)} · ${ENTREGA_ICO[x.entrega_tipo]} ${x.entrega_tipo==='obra'?esc(addr||'Obra'):esc(x.entrega_direccion||'')}${x.entrega_contacto?' · '+esc(x.entrega_contacto):''}${x.entrega_telefono?' · '+esc(x.entrega_telefono):''}</div>
+    ${s.length?`<div class="small" style="margin-top:4px;color:var(--amber)">Split: ${s.map(y=>esc(y.rfp?.rfp_number||'')+' '+y.pct+'%').join(' · ')}</div>`:''}
+    ${links.length?`<div style="margin-top:6px">${links.map(l=>`<span class="bdg st-En-pago mono">${esc(l.oc?.oc_number||'OC')} · ${esc(l.oc?.status||'')}</span>`).join(' ')}</div>`:''}
+    ${x.tomado_por&&x.estatus!=='Pendiente'?`<div class="ri-sub" style="margin-top:4px">La atiende: ${esc(x.tomado_por)}</div>`:''}
     ${x.cancelado?`<div class="small sum-bad" style="margin-top:4px">Cancelada: ${esc(x.cancelado_motivo||'')}</div>`:''}
-    ${adjH(adj.filter(a=>a.item_uuid===x.item_uuid))}</div>`}).join('')}
-  <button class="btn sec block sm" id="addadj">📎 Agregar foto o archivo</button>
-  <p class="sec-title">Historial</p><div class="card"><div class="tl">${(ev.data||[]).map(e=>`<div class="e"><div class="small">${esc(e.detalle)}</div><div class="mut small">${esc(e.usuario||'')} · ${fDT(e.created_at)}</div></div>`).join('')}</div></div>`;
-  $('#addadj').onclick=()=>addLaterFile(q,items);
+    ${x.cantidad_recibida>=x.cantidad&&!x.cancelado?'<div style="margin-top:6px"><span class="bdg b-rec">✓ Recibido completo</span></div>':''}
+    ${adjH(adj.filter(a=>a.item_uuid===x.item_uuid))}
+    ${canRecv||canEdit?`<div class="minirow">${canRecv?`<button class="abtn grn" data-recv="${x.item_uuid}">✓ Recibí material</button>`:''}${canEdit?`<button class="abtn" data-edit="${x.item_uuid}">✎ Editar</button>`:''}</div>`:''}
+    </div></div>`}).join('')}
+  <p class="stitle">Historial</p><div class="dcard"><div class="dcard-bd"><div class="tl">${(ev.data||[]).map(e=>`<div class="e"><div class="small">${esc(e.detalle)}</div><div class="ri-sub">${esc(e.usuario||'')} · ${fDT(e.created_at)}</div></div>`).join('')}</div></div></div>`;
+  m.querySelectorAll('[data-recv]').forEach(b=>b.onclick=()=>receive(items.find(x=>x.item_uuid===b.dataset.recv)));
+  m.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editExisting(items.find(x=>x.item_uuid===b.dataset.edit)));
+  $('#d-adj').onclick=()=>addLaterFile();
+  $('#d-rep').onclick=()=>repeatReq();
+  const a=$('#d-add');if(a)a.onclick=()=>editExisting(null);
+  const c=$('#d-can');if(c)c.onclick=()=>cancelOwn();
 }
-function addLaterFile(q,items){
-  sheet(`<h3>Agregar adjunto</h3><label class="f">¿A qué corresponde?</label><select class="i" id="aa"><option value="">General de la requisición</option>${items.map(x=>`<option value="${x.item_uuid}">#${x.partida} · ${esc(x.descripcion.slice(0,40))}</option>`).join('')}</select>
-   <div class="row" style="margin-top:14px"><button class="btn sec grow" id="ac">📷 Foto</button><button class="btn sec grow" id="af">📎 Archivo</button></div>`,o=>{
-    const go=cam=>{const item_uuid=o.querySelector('#aa').value||null;closeSheet();
-      const inp=document.createElement('input');inp.type='file';inp.accept=cam?'image/*':'image/*,application/pdf';if(cam)inp.capture='environment';else inp.multiple=true;
-      inp.onchange=async()=>{for(const file of inp.files){const t=document.createElement('div');t.className='toast';t.textContent='Subiendo '+file.name+'…';document.body.appendChild(t);
+function stepper(x){
+  if(x.cancelado)return'';
+  const full=(x.cantidad_recibida||0)>=x.cantidad;
+  const idx=full?4:({'Pendiente':0,'En compra':1,'En pago':2,'Pagado':3}[x.estatus]??0);
+  const lbl=['Pedido','En compra','Con OC','Pagado','Recibido'];
+  return`<div class="stp ${full?'rec':''}">${lbl.map((l,i)=>`<div class="${i<=idx?'done':''} ${i===idx?'cur':''}">${l}${i===2&&x.cantidad_con_oc>0&&x.cantidad_con_oc<x.cantidad?' ('+Math.round(x.cantidad_con_oc/x.cantidad*100)+'%)':''}${i===4&&!full&&x.cantidad_recibida>0?' ('+Math.round(x.cantidad_recibida/x.cantidad*100)+'%)':''}</div>`).join('')}</div>`;
+}
+function receive(x){
+  const rem=+(x.cantidad-x.cantidad_recibida).toFixed(3);let foto=null;
+  sheet(`<h3>Recibí material</h3><p class="small" style="margin-bottom:6px"><b>#${x.partida}</b> ${esc(x.descripcion)}</p><p class="ri-sub">Pedido ${fNum(x.cantidad)} ${esc(x.unidad||'')} · recibido ${fNum(x.cantidad_recibida)}</p>
+   <label class="lbl">Cantidad que llegó</label><input class="i mono" id="rc" inputmode="decimal" value="${rem}">
+   <label class="lbl">Notas (faltantes, daños…)</label><input class="i" id="rn">
+   <div class="minirow"><button class="abtn" id="rf">📷 Foto de la entrega</button><span class="ri-sub" id="rfl"></span></div>
+   <button class="btn grn block" id="rok" style="margin-top:14px">Registrar recepción</button>`,o=>{
+    o.querySelector('#rf').onclick=async()=>{const fs=await pickRaw(true);if(!fs.length)return;o.querySelector('#rfl').textContent='Procesando…';try{foto=await processFile(fs[0]);o.querySelector('#rfl').textContent='✓ '+fBytes(foto.blob.size)}catch(e){o.querySelector('#rfl').textContent=e.message}};
+    o.querySelector('#rok').onclick=async()=>{const c=num(o.querySelector('#rc').value);if(!(c>0))return toast('Cantidad inválida','err');
+      const btn=o.querySelector('#rok');btn.disabled=true;btn.innerHTML='<div class="spin"></div>';
+      try{let foto_url=null;
+        if(foto){const u=await uploadBlob(DET.q.folio,x.partida,foto);foto_url=u.url;await sb.from('requisicion_adjunto').insert({req_uuid:DET.q.req_uuid,item_uuid:x.item_uuid,path:u.path,url:u.url,nombre:'Recepción '+foto.name,mime:foto.mime,bytes:foto.blob.size,subido_por:S.me.email})}
+        const {error}=await sb.from('requisicion_recepcion').insert({req_uuid:DET.q.req_uuid,item_uuid:x.item_uuid,cantidad:c,recibido_por:S.me.nombre||S.me.email,notas:o.querySelector('#rn').value.trim()||null,foto_url});
+        if(error)throw error;closeSheet();toast('Recepción registrada','ok');loadDetail(DET.q.req_uuid);
+      }catch(e){btn.disabled=false;btn.textContent='Registrar recepción';toast(e.message,'err')}};
+  });
+}
+function editExisting(x){
+  const isNew=!x;const p={project_address:DET.q.project_address,project_city_state:DET.q.project_city_state};
+  let ent=x?{tipo:x.entrega_tipo,direccion:x.entrega_direccion,contacto:x.entrega_contacto,telefono:x.entrega_telefono,notas:x.entrega_notas}:{tipo:'obra'};
+  sheet(`<h3>${isNew?'Agregar partida':'Editar partida #'+x.partida}</h3>
+   <datalist id="dl-u2">${UNIDADES.map(u=>`<option value="${u}">`).join('')}</datalist>
+   <label class="lbl">Descripción *</label><div class="ac"><textarea class="i" id="ed" rows="2">${esc(x?.descripcion||'')}</textarea></div>
+   <div class="grid2"><div><label class="lbl">Cantidad *</label><input class="i mono" id="eq" inputmode="decimal" value="${x?x.cantidad:''}"></div><div><label class="lbl">Unidad</label><input class="i" id="eu" list="dl-u2" value="${esc(x?.unidad||'Pza')}"></div></div>
+   <label class="lbl">Marca / especificación</label><input class="i" id="es" value="${esc(x?.especificacion||'')}">
+   <label class="lbl">Fecha requerida</label><input class="i" type="date" id="ef" value="${esc(x?.fecha_requerida||DET.q.fecha_requerida_default||'')}">
+   <button class="entrega" id="ee">${entregaText(ent,p)}</button>
+   <button class="btn block" id="eok" style="margin-top:14px">${isNew?'Agregar':'Guardar cambios'}</button>`,o=>{
+    attachAC(o.querySelector('#ed'),m=>{o.querySelector('#ed').value=m.descripcion;if(m.unidad)o.querySelector('#eu').value=m.unidad});
+    o.querySelector('#ee').onclick=()=>{const vals={d:o.querySelector('#ed').value,q:o.querySelector('#eq').value,u:o.querySelector('#eu').value,s:o.querySelector('#es').value,f:o.querySelector('#ef').value};
+      editEntrega(ent,false,p,e=>{ent=e;editExistingRestore(x,vals,ent)})};
+    o.querySelector('#eok').onclick=()=>saveExisting(x,{d:o.querySelector('#ed').value,q:o.querySelector('#eq').value,u:o.querySelector('#eu').value,s:o.querySelector('#es').value,f:o.querySelector('#ef').value},ent);
+  });
+}
+function editExistingRestore(x,v,ent){editExisting(x);const o=$('#ov');o.querySelector('#ed').value=v.d;o.querySelector('#eq').value=v.q;o.querySelector('#eu').value=v.u;o.querySelector('#es').value=v.s;o.querySelector('#ef').value=v.f;
+  o.querySelector('#ee').innerHTML=entregaText(ent,{project_address:DET.q.project_address,project_city_state:DET.q.project_city_state});
+  o.querySelector('#ee').onclick=()=>editEntrega(ent,false,{project_address:DET.q.project_address,project_city_state:DET.q.project_city_state},e=>editExistingRestore(x,{d:o.querySelector('#ed').value,q:o.querySelector('#eq').value,u:o.querySelector('#eu').value,s:o.querySelector('#es').value,f:o.querySelector('#ef').value},e));
+  o.querySelector('#eok').onclick=()=>saveExisting(x,{d:o.querySelector('#ed').value,q:o.querySelector('#eq').value,u:o.querySelector('#eu').value,s:o.querySelector('#es').value,f:o.querySelector('#ef').value},ent)}
+async function saveExisting(x,v,ent){
+  if(!v.d.trim()||!(num(v.q)>0))return toast('Falta descripción o cantidad','err');
+  const row={descripcion:v.d.trim(),cantidad:num(v.q),unidad:v.u,especificacion:v.s||null,fecha_requerida:v.f||null,entrega_tipo:ent.tipo,entrega_direccion:ent.direccion||null,entrega_contacto:ent.contacto||null,entrega_telefono:ent.telefono||null,entrega_notas:ent.notas||null};
+  let error;
+  if(x){({error}=await sb.from('requisicion_item').update(row).eq('item_uuid',x.item_uuid).eq('estatus','Pendiente'));
+    if(!error)await sb.from('requisicion_evento').insert({req_uuid:DET.q.req_uuid,item_uuid:x.item_uuid,tipo:'edicion',detalle:`Partida ${x.partida} editada por el solicitante`,usuario:S.me.nombre||S.me.email})}
+  else{const partida=Math.max(0,...DET.items.map(i=>i.partida))+1;
+    ({error}=await sb.from('requisicion_item').insert({...row,req_uuid:DET.q.req_uuid,partida}));
+    if(!error)await sb.from('requisicion_evento').insert({req_uuid:DET.q.req_uuid,tipo:'edicion',detalle:`Partida ${partida} agregada: ${row.descripcion}`,usuario:S.me.nombre||S.me.email})}
+  if(error)return toast(error.message,'err');closeSheet();toast('Guardado','ok');loadDetail(DET.q.req_uuid);
+}
+function cancelOwn(){
+  const pend=DET.items.filter(x=>x.estatus==='Pendiente');const other=DET.items.filter(x=>!x.cancelado&&x.estatus!=='Pendiente').length;
+  sheet(`<h3>Cancelar requisición</h3><p class="small">Se cancelarán <b>${pend.length}</b> partida(s) que Compras aún no toma.${other?`<br><span class="sum-bad">${other} partida(s) ya están en compra; para esas habla con Compras.</span>`:''}</p>
+   <label class="lbl">Motivo</label><input class="i" id="cm" placeholder="Ej. ya no se necesita">
+   <button class="btn red block" id="cok" style="margin-top:14px">Cancelar ${pend.length} partida(s)</button>`,o=>{
+    o.querySelector('#cok').onclick=async()=>{const m=o.querySelector('#cm').value.trim();if(!m)return toast('Escribe el motivo','err');
+      const {error}=await sb.from('requisicion_item').update({cancelado:true,cancelado_por:S.me.nombre||S.me.email,cancelado_motivo:m,cancelado_at:new Date().toISOString()}).in('item_uuid',pend.map(x=>x.item_uuid)).eq('estatus','Pendiente');
+      if(error)return toast(error.message,'err');closeSheet();toast('Cancelada','ok');loadDetail(DET.q.req_uuid)};
+  });
+}
+async function repeatReq(force){
+  const {q,items,split,isp}=DET;
+  if(localStorage.getItem(DKEY())&&!force){
+    sheet(`<h3>Tienes un borrador sin enviar</h3><p class="mut small" style="margin-bottom:12px">Si continúas, se reemplaza por la copia de ${esc(q.folio)}.</p><button class="btn block" id="rp-ok" style="margin-bottom:8px">Reemplazar borrador</button><button class="btn ghost block" id="rp-no">Conservar mi borrador</button>`,o=>{
+      o.querySelector('#rp-ok').onclick=async()=>{closeSheet();await clearDraft();repeatReq(true)};o.querySelector('#rp-no').onclick=closeSheet});
+    return;
+  }
+  await getProjects();await ensureRfps(split.map(s=>s.rfp_uuid));
+  const d=newDraft();d.project_uuid=q.project_uuid;d.split=split.map(s=>({rfp_uuid:s.rfp_uuid,pct:Number(s.pct)}));
+  d.items=items.filter(x=>!x.cancelado).map(x=>{const it=newItem({descripcion:x.descripcion,cantidad:x.cantidad,unidad:x.unidad,especificacion:x.especificacion});
+    if(x.entrega_tipo!=='obra')it.entrega={tipo:x.entrega_tipo,direccion:x.entrega_direccion,contacto:x.entrega_contacto,telefono:x.entrega_telefono,notas:x.entrega_notas};
+    const s=isp.filter(y=>y.item_uuid===x.item_uuid);if(s.length)it.split=s.map(y=>({rfp_uuid:y.rfp_uuid,pct:Number(y.pct)}));return it});
+  d.items.forEach(x=>x.open=false);
+  if(!d.items.length)d.items=[newItem()];
+  d.step=3;S.draft=d;saveDraft();location.hash='nueva';toast('Copia lista: revisa fechas y cantidades','ok');
+}
+function addLaterFile(){
+  const {q,items}=DET;
+  sheet(`<h3>Agregar adjunto</h3><label class="lbl">¿A qué corresponde?</label><select class="i" id="aa"><option value="">General de la requisición</option>${items.map(x=>`<option value="${x.item_uuid}">#${x.partida} · ${esc(x.descripcion.slice(0,40))}</option>`).join('')}</select>
+   <div class="row" style="margin-top:12px"><button class="btn sec" style="flex:1" id="ac">📷 Foto</button><button class="btn sec" style="flex:1" id="af">📎 Archivo</button></div>`,o=>{
+    const go=async cam=>{const item_uuid=o.querySelector('#aa').value||null;closeSheet();const files=await pickRaw(cam,true);
+      for(const file of files){const t=document.createElement('div');t.className='toast';t.textContent='Subiendo '+file.name+'…';document.body.appendChild(t);
         try{const r=await processFile(file,(p,n)=>t.textContent=`Comprimiendo PDF ${p}/${n}…`);
           const partida=item_uuid?items.find(x=>x.item_uuid===item_uuid).partida:0;
-          const safe=r.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w.\-]+/g,'_').slice(-80);
-          const path=`${q.folio}/${partida?'p'+partida:'general'}/${Date.now()}_${safe}`;
-          const up=await sb.storage.from(BUCKET).upload(path,r.blob,{contentType:r.mime});if(up.error)throw up.error;
-          const url=sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+          const {path,url}=await uploadBlob(q.folio,partida,r);
           const ins=await sb.from('requisicion_adjunto').insert({req_uuid:q.req_uuid,item_uuid,path,url,nombre:r.name,mime:r.mime,bytes:r.blob.size,subido_por:S.me.email});if(ins.error)throw ins.error;
           await sb.from('requisicion_evento').insert({req_uuid:q.req_uuid,item_uuid,tipo:'adjunto',detalle:'Adjunto agregado: '+r.name,usuario:S.me.nombre||S.me.email});
-          toast('Archivo agregado');
-        }catch(e){toast(e.message,true)}t.remove()}
-        loadDetail(q.req_uuid)};
-      inp.click()};
+          toast('Archivo agregado','ok');
+        }catch(e){toast(e.message,'err')}t.remove()}
+      loadDetail(q.req_uuid)};
     o.querySelector('#ac').onclick=()=>go(true);o.querySelector('#af').onclick=()=>go(false);
   });
 }
 
-sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT'){S.me=null;showLogin()}});
+function netState(){const off=!navigator.onLine;$('#offline').classList.toggle('hidden',!off)}
+window.addEventListener('offline',netState);
+window.addEventListener('online',()=>{netState();
+  if(S.draft&&S.draft.pendingSend&&location.hash==='#nueva'&&S.draft.step===4&&$('#send')&&!$('#send').disabled){toast('Conexión recuperada · enviando…','ok');submit()}});
+netState();
 boot();
 </script>
 </body>
